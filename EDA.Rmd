@@ -1,0 +1,122 @@
+---
+title: "IDA"
+author: "Alex Liu"
+date: "2023-04-02"
+output: html_document
+---
+
+```{r message = F}
+library(EBImage)
+library(tidyverse)
+library(pracma)
+library(randomForest)
+library(ggimage)
+```
+
+```{r}
+cluster_A_files = list.files("../bio_data/Biotechnology/data_processed/cell_images/cluster_10/", full.names = T)
+
+cluster_B_files = list.files("../bio_data/Biotechnology/data_processed/cell_images/cluster_15/", full.names = T)
+
+length(cluster_A_files)
+length(cluster_B_files)
+```
+
+```{r}
+disp_cluster_img = function(cluster_files) {
+  cluster_imgs = sapply(cluster_files, readImage, simplify = F)
+  cluster_imgs_resized = lapply(cluster_imgs, resize, w = 50, h = 50)
+  cluster_imgs_tiled = tile(EBImage::combine(cluster_imgs_resized))
+  display(cluster_imgs_tiled)
+}
+```
+
+```{r}
+disp_cluster_img(cluster_A_files)
+disp_cluster_img(cluster_B_files)
+```
+
+# Cell Boundaries
+
+Keep only the cell boundary verticies that belong to the cells in Cluster A and Cluster B
+```{r}
+cell_boundaries_raw = read.csv("../bio_data/Biotechnology/data_processed/cell_boundaries.csv.gz")
+
+cluster_A_cell_ids = gsub(".*cell_|.png", "", cluster_A_files)
+cluster_B_cell_ids = gsub(".*cell_|.png", "", cluster_B_files)
+
+cell_boundaries = cell_boundaries_raw |>
+  filter(cell_id %in% c(cluster_A_cell_ids, cluster_B_cell_ids))
+```
+
+Mark and resize images for images inside.
+```{r}
+get_inside = function(cellID, img, cell_boundaries) {
+  
+  cell_boundary = cell_boundaries |>
+    filter(cell_id %in% cellID)
+  
+  # Rescale Boundary
+  pixels = dim(img)
+  cell_boundary$vertex_x_scaled <- 1 + ((cell_boundary$vertex_x - min(cell_boundary$vertex_x))/0.2125)
+  cell_boundary$vertex_y_scaled <- 1 + ((cell_boundary$vertex_y - min(cell_boundary$vertex_y))/0.2125)
+  
+  # Identify pixels inside or outside of cell segment
+  pixel_locations = expand.grid(seq_len(nrow(img)), seq_len(ncol(img)))
+  
+  pixels_inside = inpolygon(x = pixel_locations[,1],
+                            y = pixel_locations[,2],
+                            xp = cell_boundary$vertex_x_scaled,
+                            yp = cell_boundary$vertex_y_scaled,
+                            boundary = TRUE)
+  
+  img_inside = img
+  img_inside@.Data <- matrix(pixels_inside, nrow = nrow(img), ncol = ncol(img))
+  
+  return(img_inside)
+}
+```
+
+```{r}
+mask_resize = function(img, img_inside, w = 50, h = 50) {
+  img_mask = img*img_inside
+  
+  img_mask_resized = resize(img_mask, w, h)
+  
+  return(img_mask_resized)
+}
+```
+
+```{r}
+cluster_A_imgs = sapply(cluster_A_files, readImage, simplify = F)
+
+display(mask_resize(cluster_A_imgs[[1]], get_inside(cluster_A_cell_ids[1], cluster_A_imgs[[1]], cell_boundaries)), method = "raster")
+```
+
+```{r}
+cluster_A_imgs_inside = mapply(get_inside, cluster_A_cell_ids, cluster_A_imgs, MoreArgs = list(cell_boundaries = cell_boundaries), SIMPLIFY = FALSE)
+
+cluster_A_imgs_masked_resized = mapply(mask_resize, cluster_A_imgs, cluster_A_imgs_inside, SIMPLIFY=FALSE)
+
+display(tile(EBImage::combine(cluster_A_imgs_masked_resized)), method = "raster")
+```
+
+```{r}
+cluster_B_imgs = sapply(cluster_B_files, readImage, simplify = F)
+
+cluster_B_imgs_inside = mapply(get_inside, cluster_B_cell_ids, cluster_B_imgs, MoreArgs = list(cell_boundaries = cell_boundaries), SIMPLIFY = FALSE)
+
+cluster_B_imgs_masked_resized = mapply(mask_resize, cluster_B_imgs, cluster_B_imgs_inside, SIMPLIFY=FALSE)
+
+display(tile(EBImage::combine(cluster_B_imgs_masked_resized)), method = "raster")
+```
+
+
+
+
+
+
+
+
+
+
