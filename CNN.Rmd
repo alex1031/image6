@@ -5,12 +5,13 @@ date: "2023-04-17"
 output: html_document
 ---
 
-```{r}
+```{r warning=F, message=F}
 library(EBImage)
 library(tidyverse)
 library(pracma)
 library(randomForest)
 library(ggimage)
+library(keras)
 ```
 
 ```{r}
