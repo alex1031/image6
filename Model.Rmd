@@ -94,6 +94,7 @@ for (i in 1:length(labels)) {
 
 ```{r}
 set.seed(6)
+
 times = c()
 
 for (i in 1:length(labels)) {
@@ -151,6 +152,8 @@ for (i in 1:length(labels)) {
 rff = randomForest(x = t(xf), y = y)
 rff
 ```
+
+There is a very small improvement in error rate.
 
 ```{r}
 images = c()
@@ -230,6 +233,6 @@ rff
 
 ```
 
-Similar error rate. It did get better at identifying images in clusters 1 and 2, however, at the expense of identifying other clusters. 
+Similar error rate. It did get better at identifying images in clusters 1 and 2, however, it came at the expense of identifying other clusters. 
 
 

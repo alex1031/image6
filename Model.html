@@ -431,6 +431,7 @@ for (i in 1:length(labels)) {
 
 }</code></pre>
 <pre class="r"><code>set.seed(6)
+
 times = c()
 
 for (i in 1:length(labels)) {
@@ -791,6 +792,7 @@ rff</code></pre>
 ## cluster_7          5        11         0         0   0.8281250
 ## cluster_8          3         3         3         0   0.9318182
 ## cluster_9          2         1         1         0   1.0000000</code></pre>
+<p>There is a very small improvement in error rate.</p>
 <pre class="r"><code>images = c()
 for (i in 1:length(labels)) {
   
@@ -1166,7 +1168,7 @@ rff</code></pre>
 ## cluster_8          5         0         1         0   0.9772727
 ## cluster_9          2         2         0         0   1.0000000</code></pre>
 <p>Similar error rate. It did get better at identifying images in
-clusters 1 and 2, however, at the expense of identifying other
+clusters 1 and 2, however, it came at the expense of identifying other
 clusters.</p>
 </div>
 </div>
