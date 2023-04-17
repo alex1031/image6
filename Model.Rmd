@@ -1,0 +1,238 @@
+---
+title: "models"
+author: "Alex Liu"
+date: "2023-04-03"
+output: 
+  html_document:
+    code-folding: hide
+---
+
+```{r message = F, warning = F}
+library(EBImage)
+library(tidyverse)
+library(pracma)
+library(randomForest)
+library(ggimage)
+```
+
+# Random Forest (Pixel-Based)
+
+```{r}
+labels = list.files("../bio_data/Biotechnology/data_processed/cell_images/")
+cell_boundaries_raw = read.csv("../bio_data/Biotechnology/data_processed/cell_boundaries.csv.gz")
+
+cluster_ids = list()
+
+for (i in 1:length(labels)) {
+  
+  cluster_file = list.files(paste0("../bio_data/Biotechnology/data_processed/cell_images/", labels[i]))
+  
+  cluster_ids[i] <- list(gsub(".*cell_|.png", "", cluster_file))
+}
+
+cluster_imgs = list()
+
+for (i in 1:length(labels)) {
+  
+  cluster_file = list.files(paste0("../bio_data/Biotechnology/data_processed/cell_images/", labels[i]), full.names=T)
+  
+  cluster_imgs[i] <- list(sapply(cluster_file, readImage, simplify = F))
+
+}
+```
+
+```{r}
+get_inside = function(cellID, img, cell_boundaries) {
+  
+  cell_boundary = cell_boundaries |>
+    filter(cell_id %in% cellID)
+  
+  # rescale the boundary according to the pixels
+  pixels = dim(img)
+  cell_boundary$vertex_x_scaled <- 1+((cell_boundary$vertex_x - min(cell_boundary$vertex_x))/0.2125)
+  cell_boundary$vertex_y_scaled <- 1+((cell_boundary$vertex_y - min(cell_boundary$vertex_y))/0.2125)
+  
+  # identify which pixels are inside or outside of the cell segment using inpolygon
+  pixel_locations = expand.grid(seq_len(nrow(img)), seq_len(ncol(img)))
+  
+  pixels_inside = inpolygon(x = pixel_locations[,1],
+                            y = pixel_locations[,2],
+                            xp = cell_boundary$vertex_x_scaled,
+                            yp = cell_boundary$vertex_y_scaled,
+                            boundary = TRUE)
+  
+  img_inside = img
+  img_inside@.Data <- matrix(pixels_inside, nrow = nrow(img), ncol = ncol(img))
+  
+  return(img_inside)
+}
+
+mask_resize = function(img, img_inside, w = 50, h = 50) {
+  
+  img_mask = img*img_inside
+  
+  # then, transform the masked image to the same number of pixels, 50x50
+  img_mask_resized = resize(img_mask, w, h)
+  
+  return(img_mask_resized)
+}
+```
+
+```{r}
+cluster_imgs_masked_resized = list()
+
+for (i in 1:length(labels)) {
+  cell_boundaries = cell_boundaries_raw |>
+    filter(cell_id %in% cluster_ids[[i]])
+    
+  cluster_imgs_inside <- mapply(get_inside, cluster_ids[[i]], cluster_imgs[[i]], MoreArgs = list(cell_boundaries = cell_boundaries), SIMPLIFY = FALSE)
+  
+  cluster_imgs_masked_resized[i] = list(mapply(mask_resize, cluster_imgs[[i]], cluster_imgs_inside, SIMPLIFY = FALSE))
+
+}
+```
+
+```{r}
+set.seed(6)
+
+times = c()
+
+for (i in 1:length(labels)) {
+  times[i] = length(cluster_ids[[i]])
+}
+
+y = factor(rep(labels, times = times))
+x = cbind(do.call(cbind, lapply(cluster_imgs_masked_resized[[1]],c)),
+          do.call(cbind, lapply(cluster_imgs_masked_resized[[2]],c)))
+
+for (i in 3:length(cluster_imgs_masked_resized)) {
+  x = cbind(do.call(cbind, lapply(cluster_imgs_masked_resized[[i]], c)),
+            x)
+}
+
+rf = randomForest(x = t(x), y = y)
+rf
+```
+
+```{r}
+importance_img = Image(data = matrix(rf$importance, 50, 50))
+display(importance_img/quantile(importance_img, 0.99), method = "raster")
+```
+
+Cluster 1 and 2 have the lowest error rate with , while other clusters are almost all misclassified.
+
+Possible Reasons for high error rate:
+
+1. Inconsistent file size for different clusters.
+2. Model not complex enough to capture more complex shapes.
+3. Pixel intensities not normalised.
+4. Cells not aligned with each other.
+
+## Extracted features with cell boundary
+```{r}
+set.seed(66)
+cluster_img_features = list()
+xf = c()
+
+for (i in 1:length(labels)) {
+  cell_boundaries = cell_boundaries_raw |>
+    filter(cell_id %in% cluster_ids[[i]])
+    
+  cluster_imgs_inside <- mapply(get_inside, cluster_ids[[i]], cluster_imgs[[i]], MoreArgs = list(cell_boundaries = cell_boundaries), SIMPLIFY = FALSE)
+  
+  cluster_img_features[i] <- list(mapply(computeFeatures,
+                                x = cluster_imgs_inside,
+                                ref = cluster_imgs[[i]],
+                                MoreArgs = list(expandRef = NULL)))
+  
+  xf <- cbind(cluster_img_features[[i]], xf)
+  
+}
+
+rff = randomForest(x = t(xf), y = y)
+rff
+```
+
+There is a very small improvement in error rate.
+
+```{r}
+images = c()
+for (i in 1:length(labels)) {
+  
+  cluster_file = list.files(paste0("../bio_data/Biotechnology/data_processed/cell_images/", labels[i]), full.names = T)
+  
+  images <- append(images, cluster_file)
+}
+
+pc = princomp(t(xf), cor = T)
+
+features_pc_df = data.frame(PC1 = pc$scores[, 1],
+                            PC2 = pc$scores[, 2],
+                            cluster = y,
+                            images = images)
+
+ggplot(features_pc_df, aes(x = PC1, y = PC2)) + 
+  geom_point(aes(colour = cluster)) +
+  geom_image(aes(image = images), size=0.03)
+```
+
+Despite the high error% of the random forest model, there is still a noticeable distance between high and low intensity images. 
+
+```{r}
+ggplot(features_pc_df, aes(x = PC1, y = PC2)) + 
+  geom_point(aes(colour = cluster))
+```
+
+However, it may be difficult to use PCA loading to interpret the extracted features associated with the visual characteristics.
+
+## Is there a difference for Random Forest without the use of cell boundary
+
+```{r}
+set.seed(61)
+xnobound = c()
+
+for (i in 1:length(cluster_imgs)) {
+  xnobound = cbind(do.call(cbind, lapply(cluster_imgs_masked_resized[[i]], c)),
+            xnobound)
+}
+
+rf = randomForest(x = t(xnobound), y = y)
+rf
+```
+
+```{r}
+importance_img = Image(data = matrix(rf$importance, 50, 50))
+display(importance_img/quantile(importance_img, 0.99), method = "raster")
+```
+
+
+Slight improvement but not significant, with improvement of about 2%. Cluster 1 and 2 remains the clusters with lowest error rate.
+
+### Same random forest with extracted features
+
+```{r}
+set.seed(62)
+cluster_img_features_nobound = list()
+xfnobound = c()
+
+for (i in 1:length(labels)) {
+  cell_boundaries = cell_boundaries_raw |>
+    filter(cell_id %in% cluster_ids[[i]])
+  
+  cluster_img_features[i] <- list(mapply(computeFeatures,
+                                x = cluster_imgs[[i]],
+                                ref = cluster_imgs[[i]],
+                                MoreArgs = list(expandRef = NULL)))
+  
+  xfnobound <- cbind(cluster_img_features[[i]], xfnobound)
+  
+}
+
+rff = randomForest(x = t(xfnobound), y = y)
+rff
+
+```
+
+Similar error rate. It did get better at identifying images in clusters 1 and 2, however, it came at the expense of identifying other clusters. 
+
+
