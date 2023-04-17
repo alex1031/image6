@@ -5,3 +5,88 @@ date: "2023-04-17"
 output: html_document
 ---
 
+```{r}
+library(EBImage)
+library(tidyverse)
+library(pracma)
+library(randomForest)
+library(ggimage)
+```
+
+```{r}
+labels = list.files("../bio_data/Biotechnology/data_processed/cell_images/")
+cell_boundaries_raw = read.csv("../bio_data/Biotechnology/data_processed/cell_boundaries.csv.gz")
+
+cluster_ids = list()
+
+for (i in 1:length(labels)) {
+  
+  cluster_file = list.files(paste0("../bio_data/Biotechnology/data_processed/cell_images/", labels[i]))
+  
+  cluster_ids[i] <- list(gsub(".*cell_|.png", "", cluster_file))
+}
+
+cluster_imgs = list()
+
+for (i in 1:length(labels)) {
+  
+  cluster_file = list.files(paste0("../bio_data/Biotechnology/data_processed/cell_images/", labels[i]), full.names=T)
+  
+  cluster_imgs[i] <- list(sapply(cluster_file, readImage, simplify = F))
+
+}
+```
+
+```{r}
+get_inside = function(cellID, img, cell_boundaries) {
+  
+  cell_boundary = cell_boundaries |>
+    filter(cell_id %in% cellID)
+  
+  # rescale the boundary according to the pixels
+  pixels = dim(img)
+  cell_boundary$vertex_x_scaled <- 1+((cell_boundary$vertex_x - min(cell_boundary$vertex_x))/0.2125)
+  cell_boundary$vertex_y_scaled <- 1+((cell_boundary$vertex_y - min(cell_boundary$vertex_y))/0.2125)
+  
+  # identify which pixels are inside or outside of the cell segment using inpolygon
+  pixel_locations = expand.grid(seq_len(nrow(img)), seq_len(ncol(img)))
+  
+  pixels_inside = inpolygon(x = pixel_locations[,1],
+                            y = pixel_locations[,2],
+                            xp = cell_boundary$vertex_x_scaled,
+                            yp = cell_boundary$vertex_y_scaled,
+                            boundary = TRUE)
+  
+  img_inside = img
+  img_inside@.Data <- matrix(pixels_inside, nrow = nrow(img), ncol = ncol(img))
+  
+  return(img_inside)
+}
+
+mask_resize = function(img, img_inside, w = 50, h = 50) {
+  
+  img_mask = img*img_inside
+  
+  # then, transform the masked image to the same number of pixels, 50x50
+  img_mask_resized = resize(img_mask, w, h)
+  
+  return(img_mask_resized)
+}
+```
+
+```{r}
+cluster_imgs_masked_resized = list()
+
+for (i in 1:length(labels)) {
+  cell_boundaries = cell_boundaries_raw |>
+    filter(cell_id %in% cluster_ids[[i]])
+    
+  cluster_imgs_inside <- mapply(get_inside, cluster_ids[[i]], cluster_imgs[[i]], MoreArgs = list(cell_boundaries = cell_boundaries), SIMPLIFY = FALSE)
+  
+  cluster_imgs_masked_resized[i] = list(mapply(mask_resize, cluster_imgs[[i]], cluster_imgs_inside, SIMPLIFY = FALSE))
+
+}
+```
+
+
+
