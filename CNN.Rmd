@@ -11,7 +11,6 @@ library(tidyverse)
 library(pracma)
 library(randomForest)
 library(ggimage)
-library(keras)
 ```
 
 ```{r}
@@ -84,10 +83,114 @@ for (i in 1:length(labels)) {
     
   cluster_imgs_inside <- mapply(get_inside, cluster_ids[[i]], cluster_imgs[[i]], MoreArgs = list(cell_boundaries = cell_boundaries), SIMPLIFY = FALSE)
   
-  cluster_imgs_masked_resized[i] = list(mapply(mask_resize, cluster_imgs[[i]], cluster_imgs_inside, SIMPLIFY = FALSE))
+  cluster_imgs_masked_resized[i] = list(mapply(mask_resize, cluster_imgs[[i]], cluster_imgs_inside, MoreArgs = list(w = 64, h = 64), SIMPLIFY = FALSE))
 
 }
 ```
+
+```{r}
+set.seed(63)
+library(keras)
+use_condaenv("r-reticulate", required=T)
+tensorflow::set_random_seed(63)
+
+imgs_masked_resize_64 = do.call(c, cluster_imgs_masked_resized)
+
+num_images = length(imgs_masked_resize_64)
+img_names = names(imgs_masked_resize_64)
+
+x = array(dim = c(num_images, 64, 64, 1))
+
+for (i in 1:num_images) {
+  x[i,,,1] <- imgs_masked_resize_64[[i]]@.Data
+}
+
+input_shape = dim(x)[2:4]
+```
+
+```{r}
+model_function <- function(learning_rate = 0.001) {
+  
+  k_clear_session()
+  
+  model <- keras_model_sequential() %>%
+    layer_conv_2d(filters = 32, kernel_size = c(3,3), activation = 'relu', input_shape = input_shape) %>% 
+    layer_max_pooling_2d(pool_size = c(2, 2)) %>% 
+    layer_conv_2d(filters = 64, kernel_size = c(3,3), activation = 'relu') %>% 
+    layer_max_pooling_2d(pool_size = c(2, 2)) %>% 
+    layer_dropout(rate = 0.25) %>% 
+    layer_flatten() %>% 
+    layer_dense(units = 128, activation = 'relu') %>% 
+    layer_dropout(rate = 0.5) %>% 
+    layer_dense(units = 64) %>% 
+    layer_dropout(rate = 0.5) %>% 
+    layer_dense(units = 28, activation = 'softmax')
+  
+  model %>% compile(
+    loss = "binary_crossentropy",
+    optimizer = optimizer_adam(learning_rate = learning_rate),
+    metrics = "accuracy"
+  )
+  
+  return(model)
+  
+}
+
+# Let this model compile and inspect its architecture
+
+model <- model_function()
+model
+```
+
+```{r}
+times = c()
+
+for (i in 1:length(labels)) {
+  times[i] = length(cluster_ids[[i]])
+}
+
+y = factor(rep(labels, times = times))
+```
+
+```{r}
+batch_size <- 32
+epochs <- 100
+
+yy = model.matrix(~ y - 1)
+```
+
+```{r}
+set.seed(63)
+shuf_ind <- sample(dim(x)[1])
+shuf_x <- x[shuf_ind, , ,]
+shuf_x <- array(shuf_x, dim = c(dim(shuf_x)[1], dim(shuf_x)[2], dim(shuf_x)[3], 1))
+
+shuf_yy <- yy[shuf_ind, ]
+
+hist <- model %>% fit(
+  x = shuf_x,
+  y = shuf_yy,
+  batch_size = batch_size,
+  steps_per_epoch = 800 %/% batch_size,
+  epochs = epochs, 
+  validation_split = 0.2,
+  verbose = 2
+)
+
+plot(hist)
+```
+
+```{r}
+pred <- model |> predict(x)
+
+pred_class = apply(pred, 1, which.max)
+
+1-(sum(diag(table(pred_class, y)))/length(y))
+```
+
+
+
+
 
 
 
