@@ -1,0 +1,201 @@
+---
+title: "Presentation Notes"
+subtitle: "..."
+author: "Image 6"
+output:
+  xaringan::moon_reader:
+    css: ["default", "Presentation_files/assets/sydney-fonts.css", "Presentation_files/assets/sydney.css"]
+    self_contained: false # if true, fonts will be stored locally
+    seal: true # show a title slide with YAML information
+    includes:
+      in_header: "Presentation_files/assets/mathjax-equation-numbers.html"
+    nature:
+      beforeInit: ["Presentation_files/assets/remark-zoom.js", "https://platform.twitter.com/widgets.js"]
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: '16:9' # alternatives '16:9' or '4:3' or others e.g. 13:9
+      navigation:
+        scroll: false # disable slide transitions by scrolling
+---
+
+```{r, load_refs, echo=FALSE, cache=FALSE, message=FALSE, warning=FALSE}
+library(RefManageR)
+BibOptions(check.entries = FALSE, 
+           bib.style = "authoryear", 
+           cite.style = 'authoryear', 
+           style = "markdown",
+           hyperlink = FALSE, 
+           dashed = FALSE)
+myBib <- ReadBib("Presentation_files/assets/example.bib", check = FALSE)
+top_icon = function(x) {
+  icons::icon_style(
+    icons::fontawesome(x),
+    position = "fixed", top = 10, right = 10
+  )
+}
+
+library(tidyverse)
+library(gridExtra)
+library(lattice)
+library(ggplot2)
+library(caret)
+library(ggfortify)
+library(kableExtra)
+library(plotly)
+library(dplyr)
+```
+
+
+
+
+## General Overview 
+
+**BACKGROUND:**
+
+ 
+
+**AIM:**
+
+
+
+---
+
+## Data set 
+
+
+
+**DATA SET DESCRIPTION:**
+
+
+
+---
+
+
+
+## Initial Data Analysis (IDA)
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+```
+
+.scroll-output[
+```{r}
+
+```
+]
+
+
+---
+class: segue-red
+
+# Model 1
+
+
+.left[.footnote[
+
+```
+---
+class: segue
+```
+
+]]
+
+
+---
+
+## 
+
+.pull-left[
+```{r, echo=FALSE}
+
+
+```
+]
+
+
+.pull-right[
+```{r, echo=FALSE}
+
+```
+]
+
+---
+
+## 
+
+
+.pull-left[
+```{r, echo=FALSE}
+
+```
+]
+
+
+.pull-right[
+
+
+    
+]
+
+---
+
+
+.scroll-output[.pull-right[
+```{r, echo=FALSE, message=FALSE}
+
+```
+]]
+
+
+---
+
+
+--
+
+.pull-right[.scroll-output[
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+
+```
+
+
+]]
+
+
+
+
+---
+class: segue-yellow
+
+# Model 2
+
+
+.left[.footnote[
+
+```
+---
+class: segue
+```
+
+]]
+
+---
+
+
+
+## Limitations of own analysis
+
+
+---
+
+
+## Future Study Recommendation
+
+
+
+---
+
+## References (APA Style)
+
+
+
