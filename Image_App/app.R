@@ -10,100 +10,70 @@
 library(shiny)
 library(rdrop2)
 
-# Define UI for application 
+
+
 ui <- fluidPage(
   
   titlePanel("Robustness on Cell Image Classification"),
   
-  navlistPanel(
-    "Affects of Robustness",
-    tabPanel("Noise Levels"),
-    tabPanelBody(
-      sidebarLayout(
-        sidebarPanel(
-          sliderInput("bins",
-                      "Noise Levels:",
-                      min = 0,
-                      max = 1,
-                      value = 0.2)
-        )
-      
+  navbarPage(
+    "Effects of Robustness",
+    
+    tabPanel("Noise Levels",
+             sidebarLayout(
+               sidebarPanel(
+                 sliderInput("noise-level", "Noise Levels:", min = 0, max = 1, value = 0.2)
+               ),
+               mainPanel(
+                 tabsetPanel(
+                   tabPanel("Performance"),
+                   tabPanel("Mutated Image")
+                 )
+               )
+             )
+    ), 
+    
+    tabPanel("Image Resolution",
+             sidebarLayout(
+               sidebarPanel(
+                 sliderInput("resolution", "Resolution:", min = 1, max = 150, value = 55)
+               ),
+               mainPanel(
+                 tabsetPanel(
+                   tabPanel("Performance"),
+                   tabPanel("Mutated Image")
+                 )
+               )
+             )
+    ), 
+    
+    tabPanel("Image Rotation",
+             sidebarLayout(
+               sidebarPanel(
+                 sliderInput("rotation", "Rotation:", min = 0, max = 360, value = 60)
+               ),
+               mainPanel(
+                 tabsetPanel(
+                   tabPanel("Performance"),
+                   tabPanel("Mutated Image")
+                 )
+               )
+             )
+    ),
+    
+    tabPanel("Demonstration",
+             fluidRow(
+               column(4, fileInput("file", h3("File input"))),
+               column(4, sliderInput("noise-level-demo", "Noise Level", min = 0, max = 1, value = 0.2)),
+               column(4, sliderInput("resolution-demo", "Resolution", min = 1, max = 150, value = 55)),
+               column(4, sliderInput("rotation-demo", "Rotation", min = 0, max = 360, value = 60))
+             )
     )
-    ), 
-    mainPanel(
-      tabsetPanel(
-        tabPanel("Performance", plotOutput("plot")), 
-        tabPanel("Mutated Image", plotOutput("summary")), 
-      )
-    ),
-    
-    
-    tabPanel("Image Resolution"),
-    tabPanelBody(
-      sidebarLayout(
-        sidebarPanel(
-          sliderInput("bins",
-                      "Resolution:",
-                      min = 1,
-                      max = 150,
-                      value = 55)
-        )
-        
-      )
-    ), 
-    mainPanel(
-      tabsetPanel(
-        tabPanel("Performance", plotOutput("plot")), 
-        tabPanel("Mutated Image", plotOutput("summary")), 
-      )
-    ),
-    
-    
-    tabPanel("Image Rotation"),
-    tabPanelBody(
-      sidebarLayout(
-        sidebarPanel(
-          sliderInput("bins",
-                      "Rotation:",
-                      min = 0,
-                      max = 360,
-                      value = 60)
-        )
-        
-      )
-    ), 
-    mainPanel(
-      tabsetPanel(
-        tabPanel("Performance", plotOutput("plot")), 
-        tabPanel("Mutated Image", plotOutput("summary")), 
-      )
-    ),
-    
-    
-    "Demonstration",
-    tabPanel("...")
   )
 )
 
-
-
-
-
-# Define server logic required to draw a histogram 
-# Serves = analysis to build the app
 server <- function(input, output) {
-
-    output$distPlot <- renderPlot({
-        # generate bins based on input$bins from ui.R
-        x    <- faithful[, 2]
-        bins <- seq(min(x), max(x), length.out = input$bins + 1)
-
-        # draw the histogram with the specified number of bins
-        hist(x, breaks = bins, col = 'darkgray', border = 'white',
-             xlab = 'Waiting time to next eruption (in mins)',
-             main = 'Histogram of waiting times')
-    })
+  
 }
 
-# Run the application 
 shinyApp(ui = ui, server = server)
