@@ -1,0 +1,71 @@
+install.packages("keras")
+install.packages("magick")
+install.packages("dplyr")
+library(keras)
+library(magick)
+library(dplyr)
+
+data <- read.csv("cell_boundaries.csv")
+image_paths <- data$Image_Path # 假设图像路径存储在 Image_Path 列中
+labels <- data$Label # 假设标签存储在 Label 列中
+
+
+images <- lapply(image_paths, function(path) {
+  image_read(path)
+})
+
+
+set.seed(123)
+indexes <- sample(1:length(labels), size = 0.8 * length(labels))
+train_images <- images[indexes]
+train_labels <- labels[indexes]
+test_images <- images[-indexes]
+test_labels <- labels[-indexes]
+
+preprocess_image <- function(img) {
+  img <- image_resize(img, "64x64!") 
+  img <- image_convert(img, "RGB")
+  img <- as.raster(img)
+  img <- as.array(img) / 255
+  return(img)
+}
+
+train_images <- lapply(train_images, preprocess_image)
+test_images <- lapply(test_images, preprocess_image)
+
+# 将标签转换为 one-hot 编码
+train_labels <- to_categorical(train_labels)
+test_labels <- to_categorical(test_labels)
+
+rotate_image <- function(img, angle) {
+  img <- image_read(img)
+  img <- image_rotate(img, angle)
+  img <- image_convert(img, "RGB")
+  img <- as.raster(img)
+  img <- as.array(img) / 255
+  return(img)
+}
+
+# ...
+
+
+score <- model %>% evaluate(test_images, test_labels)
+cat("Test loss:", score[[1]], "\n")
+cat("Test accuracy:", score[[2]], "\n")
+
+
+# ...
+
+for (angle in rotation_angles) {
+  rotated_test_images <- lapply(test_images, rotate_image, angle = angle)
+  rotated_test_images <- array_reshape(rotated_test_images, c(length(rotated_test_images), 64, 64, 3))
+  score <- model %>% evaluate(rotated_test_images, test_labels)
+  results <- rbind(results, data.frame(Angle = angle, Loss = score[[1]], Accuracy = score[[2]]))
+}
+
+
+library(ggplot2)
+ggplot(results, aes(x = Angle, y = Accuracy)) +
+  geom_line() +
+  geom_point() +
+  labs
