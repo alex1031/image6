@@ -17,6 +17,8 @@ ui <- fluidPage(
   navbarPage(
     "Effects of Robustness",
     
+    tabPanel("Introduction"),
+    
     tabPanel("Noise Levels",
              sidebarLayout(
                sidebarPanel(
@@ -61,10 +63,12 @@ ui <- fluidPage(
     
     tabPanel("Demonstration",
              fluidRow(
-               column(4, fileInput("file", h3("File input"))),
-               column(4, sliderInput("noise-level-demo", "Noise Level", min = 0, max = 1, value = 0.2)),
-               column(4, sliderInput("resolution-demo", "Resolution", min = 1, max = 150, value = 55)),
-               column(4, sliderInput("rotation-demo", "Rotation", min = 0, max = 360, value = 60))
+               column(4,
+                      fileInput("file", h3("File input")), 
+                      sliderInput("noise-level-demo", "Noise Level", min = 0, max = 1, value = 0.2),
+                      sliderInput("resolution-demo", "Resolution", min = 1, max = 150, value = 55),
+                      sliderInput("rotation-demo", "Rotation", min = 0, max = 360, value = 60)
+                      )
              )
     )
   )
