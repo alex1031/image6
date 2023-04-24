@@ -1,0 +1,314 @@
+---
+title: "CNN"
+author: "Alex Liu"
+date: "2023-04-17"
+output: html_document
+---
+
+```{r warning=F, message=F}
+library(EBImage)
+library(tidyverse)
+library(pracma)
+library(randomForest)
+library(ggimage)
+```
+
+```{r}
+labels = list.files("../bio_data/Biotechnology/data_processed/cell_images/")
+cell_boundaries_raw = read.csv("../bio_data/Biotechnology/data_processed/cell_boundaries.csv.gz")
+
+cluster_ids = list()
+
+for (i in 1:length(labels)) {
+  
+  cluster_file = list.files(paste0("../bio_data/Biotechnology/data_processed/cell_images/", labels[i]))
+  
+  cluster_ids[i] <- list(gsub(".*cell_|.png", "", cluster_file))
+}
+
+cluster_imgs = list()
+
+for (i in 1:length(labels)) {
+  
+  cluster_file = list.files(paste0("../bio_data/Biotechnology/data_processed/cell_images/", labels[i]), full.names=T)
+  
+  cluster_imgs[i] <- list(sapply(cluster_file, readImage, simplify = F))
+
+}
+```
+
+```{r}
+get_inside = function(cellID, img, cell_boundaries) {
+  
+  cell_boundary = cell_boundaries |>
+    filter(cell_id %in% cellID)
+  
+  # rescale the boundary according to the pixels
+  pixels = dim(img)
+  cell_boundary$vertex_x_scaled <- 1+((cell_boundary$vertex_x - min(cell_boundary$vertex_x))/0.2125)
+  cell_boundary$vertex_y_scaled <- 1+((cell_boundary$vertex_y - min(cell_boundary$vertex_y))/0.2125)
+  
+  # identify which pixels are inside or outside of the cell segment using inpolygon
+  pixel_locations = expand.grid(seq_len(nrow(img)), seq_len(ncol(img)))
+  
+  pixels_inside = inpolygon(x = pixel_locations[,1],
+                            y = pixel_locations[,2],
+                            xp = cell_boundary$vertex_x_scaled,
+                            yp = cell_boundary$vertex_y_scaled,
+                            boundary = TRUE)
+  
+  img_inside = img
+  img_inside@.Data <- matrix(pixels_inside, nrow = nrow(img), ncol = ncol(img))
+  
+  return(img_inside)
+}
+
+mask_resize = function(img, img_inside, w = 50, h = 50) {
+  
+  img_mask = img*img_inside
+  
+  # then, transform the masked image to the same number of pixels, 50x50
+  img_mask_resized = resize(img_mask, w, h)
+  
+  return(img_mask_resized)
+}
+```
+
+```{r}
+cluster_imgs_masked_resized = list()
+
+for (i in 1:length(labels)) {
+  cell_boundaries = cell_boundaries_raw |>
+    filter(cell_id %in% cluster_ids[[i]])
+    
+  cluster_imgs_inside <- mapply(get_inside, cluster_ids[[i]], cluster_imgs[[i]], MoreArgs = list(cell_boundaries = cell_boundaries), SIMPLIFY = FALSE)
+  
+  cluster_imgs_masked_resized[i] = list(mapply(mask_resize, cluster_imgs[[i]], cluster_imgs_inside, MoreArgs = list(w = 64, h = 64), SIMPLIFY = FALSE))
+
+}
+```
+
+```{r}
+set.seed(63)
+library(keras)
+use_condaenv("r-reticulate", required=T)
+tensorflow::set_random_seed(63)
+
+imgs_masked_resize_64 = do.call(c, cluster_imgs_masked_resized)
+
+num_images = length(imgs_masked_resize_64)
+img_names = names(imgs_masked_resize_64)
+
+x = array(dim = c(num_images, 64, 64, 1))
+
+# Centering Intensity values
+for (i in 1:num_images) {
+  x[i,,,1] <- imgs_masked_resize_64[[i]]@.Data - mean(imgs_masked_resize_64[[i]]@.Data)
+}
+
+input_shape = dim(x)[2:4]
+```
+
+```{r}
+temp <- (imgs_masked_resize_64[[1]]@.Data) - mean((imgs_masked_resize_64[[1]]@.Data))
+
+display(temp, method = "raster")
+display(imgs_masked_resize_64[[1]], method = "raster")
+display()
+```
+
+
+```{r}
+model_function <- function(learning_rate = 0.001) {
+  
+  k_clear_session()
+  
+  model <- keras_model_sequential() %>%
+    layer_conv_2d(filters = 32, kernel_size = c(3,3), activation = 'relu', input_shape = input_shape) %>% 
+    layer_max_pooling_2d(pool_size = c(2, 2)) %>% 
+    layer_conv_2d(filters = 64, kernel_size = c(3,3), activation = 'relu') %>% 
+    layer_max_pooling_2d(pool_size = c(2, 2)) %>% 
+    layer_dropout(rate = 0.25) %>% 
+    layer_flatten() %>% 
+    layer_dense(units = 128, activation = 'relu') %>% 
+    layer_dropout(rate = 0.5) %>% 
+    layer_dense(units = 64) %>% 
+    layer_dropout(rate = 0.5) %>% 
+    layer_dense(units = 28, activation = 'softmax')
+  
+  model %>% compile(
+    loss = "binary_crossentropy",
+    optimizer = optimizer_adam(learning_rate = learning_rate),
+    metrics = "accuracy"
+  )
+  
+  return(model)
+  
+}
+
+# Let this model compile and inspect its architecture
+
+model <- model_function()
+model
+```
+
+```{r}
+times = c()
+
+for (i in 1:length(labels)) {
+  times[i] = length(cluster_ids[[i]])
+}
+
+y = factor(rep(labels, times = times))
+
+batch_size <- 32
+epochs <- 100
+
+yy = model.matrix(~ y - 1)
+
+set.seed(63)
+shuf_ind <- sample(1:dim(x)[1], dim(x)[1]*0.8)
+shuf_x_train <- x[shuf_ind, , ,]
+shuf_x_train <- array(shuf_x_train, dim = c(dim(shuf_x_train)[1], dim(shuf_x_train)[2], dim(shuf_x_train)[3], 1))
+
+shuf_x_test <- x[-shuf_ind, , ,]
+shuf_x_test <- array(shuf_x_test, dim = c(dim(shuf_x_test)[1], dim(shuf_x_test)[2], dim(shuf_x_test)[3], 1))
+
+shuf_yy_train <- yy[shuf_ind, ]
+shuf_yy_test <- yy[-shuf_ind, ]
+```
+
+```{r}
+# Addressing class imbalance through using class weights
+clcount <- table(y[shuf_ind])
+
+class_weight <- list(
+  "0" = sum(clcount) / (28*clcount["cluster_1"]),
+  "1" = sum(clcount) / (28*clcount["cluster_10"]),
+  "2" = sum(clcount) / (28*clcount["cluster_11"]),
+  "3" = sum(clcount) / (28*clcount["cluster_12"]),
+  "4" = sum(clcount) / (28*clcount["cluster_13"]),
+  "5" = sum(clcount) / (28*clcount["cluster_14"]),
+  "6" = sum(clcount) / (28*clcount["cluster_15"]),
+  "7" = sum(clcount) / (28*clcount["cluster_16"]),
+  "8" = sum(clcount) / (28*clcount["cluster_17"]),
+  "9" = sum(clcount) / (28*clcount["cluster_18"]),
+  "10" = sum(clcount) / (28*clcount["cluster_19"]),
+  "11" = sum(clcount) / (28*clcount["cluster_2"]),
+  "12" = sum(clcount) / (28*clcount["cluster_20"]),
+  "13" = sum(clcount) / (28*clcount["cluster_21"]),
+  "14" = sum(clcount) / (28*clcount["cluster_22"]),
+  "15" = sum(clcount) / (28*clcount["cluster_23"]),
+  "16" = sum(clcount) / (28*clcount["cluster_24"]),
+  "17" = sum(clcount) / (28*clcount["cluster_25"]),
+  "18" = sum(clcount) / (28*clcount["cluster_26"]),
+  "19" = sum(clcount) / (28*clcount["cluster_27"]),
+  "20" = sum(clcount) / (28*clcount["cluster_28"]),
+  "21" = sum(clcount) / (28*clcount["cluster_3"]),
+  "22" = sum(clcount) / (28*clcount["cluster_4"]),
+  "23" = sum(clcount) / (28*clcount["cluster_5"]),
+  "24" = sum(clcount) / (28*clcount["cluster_6"]),
+  "25" = sum(clcount) / (28*clcount["cluster_7"]),
+  "26" = sum(clcount) / (28*clcount["cluster_8"]),
+  "27" = sum(clcount) / (28*clcount["cluster_9"])
+)
+```
+
+
+```{r}
+
+hist <- model %>% fit(
+  x = shuf_x_train,
+  y = shuf_yy_train,
+  batch_size = batch_size,
+  steps_per_epoch = (800*0.8) %/% batch_size,
+  class_weight = class_weight,
+  epochs = epochs, 
+  validation_split = 0.2,
+  verbose = 2
+)
+
+plot(hist)
+```
+
+```{r}
+pred <- model |> predict(shuf_x_test)
+
+pred_class = apply(pred, 1, which.max)
+
+1-(sum(diag(table(pred_class, y[-shuf_ind])))/length(y[-shuf_ind]))
+```
+
+# AlexNet
+
+```{r}
+alexnet_func <- function(learning_rate = 0.001) {
+  
+  k_clear_session()
+  
+  model <- keras_model_sequential() %>%
+    # First layer
+    layer_conv_2d(filters = 96, kernel_size = c(11, 11), strides = c(4, 4), activation = 'relu', input_shape = input_shape) %>% 
+    layer_batch_normalization() %>%
+    layer_max_pooling_2d(pool_size = c(2, 2), strides = c(2,2)) %>%
+    # Second
+    layer_conv_2d(filters = 256, kernel_size = c(5, 5), strides = c(1, 1), activation = 'relu', padding = "same") %>%
+    layer_batch_normalization() %>%
+    layer_max_pooling_2d(pool_size = c(2, 2), strides=c(2, 2)) %>%
+    # Third
+    layer_conv_2d(filters = 384, kernel_size = c(3, 3), strides = c(1, 1), activation = "relu", padding = "same") %>%
+    layer_batch_normalization() %>%
+    # Fourth
+    layer_conv_2d(filters = 384, kernel_size = c(3, 3), strides = c(1, 1), activation = "relu", padding = "same") %>%
+    layer_batch_normalization() %>%
+    # Fifth
+    layer_conv_2d(filters = 256, kernel_size = c(3, 3), strides = c(1, 1), activation = "relu", padding = "same") %>%
+    layer_batch_normalization() %>%
+    layer_max_pooling_2d(pool_size = c(2, 2), strides = c(2, 2)) %>%
+    layer_flatten() %>% 
+    layer_dense(units = 4096, activation = 'relu') %>% 
+    layer_dropout(rate = 0.5) %>% 
+    layer_dense(units = 4096, activation = "relu") %>% 
+    layer_dropout(rate = 0.5) %>% 
+    layer_dense(units = 28, activation = 'softmax')
+  
+  model %>% compile(
+    loss = "categorical_crossentropy",
+    optimizer = optimizer_adam(learning_rate = learning_rate),
+    metrics = "accuracy"
+  )
+  
+  return(model)
+  
+}
+
+# Let this model compile and inspect its architecture
+
+alexnet <- alexnet_func()
+alexnet
+```
+
+```{r}
+hist <- alexnet %>% fit(
+  x = shuf_x_train,
+  y = shuf_yy_train,
+  batch_size = batch_size,
+  steps_per_epoch = (800*0.8) %/% batch_size,
+  epochs = epochs, 
+  class_weight = class_weight,
+  validation_split = 0.2,
+  verbose = 2
+)
+
+plot(hist)
+```
+
+```{r}
+table(y[shuf_ind])
+```
+
+
+
+
+
+
