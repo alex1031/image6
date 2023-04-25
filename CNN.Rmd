@@ -110,11 +110,10 @@ input_shape = dim(x)[2:4]
 ```
 
 ```{r}
-temp <- (imgs_masked_resize_64[[1]]@.Data) - mean((imgs_masked_resize_64[[1]]@.Data))
+temp <- (imgs_masked_resize_64[[100]]@.Data) - mean((imgs_masked_resize_64[[1]]@.Data))
 
 display(temp, method = "raster")
-display(imgs_masked_resize_64[[1]], method = "raster")
-display()
+display(imgs_masked_resize_64[[100]], method = "raster")
 ```
 
 
@@ -137,7 +136,7 @@ model_function <- function(learning_rate = 0.001) {
     layer_dense(units = 28, activation = 'softmax')
   
   model %>% compile(
-    loss = "binary_crossentropy",
+    loss = "categorical_crossentropy",
     optimizer = optimizer_adam(learning_rate = learning_rate),
     metrics = "accuracy"
   )
@@ -221,8 +220,8 @@ hist <- model %>% fit(
   x = shuf_x_train,
   y = shuf_yy_train,
   batch_size = batch_size,
-  steps_per_epoch = (800*0.8) %/% batch_size,
-  class_weight = class_weight,
+  steps_per_epoch = (dim(shuf_x_train)[1]*0.8) %/% batch_size,
+  #class_weight = class_weight,
   epochs = epochs, 
   validation_split = 0.2,
   verbose = 2
@@ -230,85 +229,4 @@ hist <- model %>% fit(
 
 plot(hist)
 ```
-
-```{r}
-pred <- model |> predict(shuf_x_test)
-
-pred_class = apply(pred, 1, which.max)
-
-1-(sum(diag(table(pred_class, y[-shuf_ind])))/length(y[-shuf_ind]))
-```
-
-# AlexNet
-
-```{r}
-alexnet_func <- function(learning_rate = 0.001) {
-  
-  k_clear_session()
-  
-  model <- keras_model_sequential() %>%
-    # First layer
-    layer_conv_2d(filters = 96, kernel_size = c(11, 11), strides = c(4, 4), activation = 'relu', input_shape = input_shape) %>% 
-    layer_batch_normalization() %>%
-    layer_max_pooling_2d(pool_size = c(2, 2), strides = c(2,2)) %>%
-    # Second
-    layer_conv_2d(filters = 256, kernel_size = c(5, 5), strides = c(1, 1), activation = 'relu', padding = "same") %>%
-    layer_batch_normalization() %>%
-    layer_max_pooling_2d(pool_size = c(2, 2), strides=c(2, 2)) %>%
-    # Third
-    layer_conv_2d(filters = 384, kernel_size = c(3, 3), strides = c(1, 1), activation = "relu", padding = "same") %>%
-    layer_batch_normalization() %>%
-    # Fourth
-    layer_conv_2d(filters = 384, kernel_size = c(3, 3), strides = c(1, 1), activation = "relu", padding = "same") %>%
-    layer_batch_normalization() %>%
-    # Fifth
-    layer_conv_2d(filters = 256, kernel_size = c(3, 3), strides = c(1, 1), activation = "relu", padding = "same") %>%
-    layer_batch_normalization() %>%
-    layer_max_pooling_2d(pool_size = c(2, 2), strides = c(2, 2)) %>%
-    layer_flatten() %>% 
-    layer_dense(units = 4096, activation = 'relu') %>% 
-    layer_dropout(rate = 0.5) %>% 
-    layer_dense(units = 4096, activation = "relu") %>% 
-    layer_dropout(rate = 0.5) %>% 
-    layer_dense(units = 28, activation = 'softmax')
-  
-  model %>% compile(
-    loss = "categorical_crossentropy",
-    optimizer = optimizer_adam(learning_rate = learning_rate),
-    metrics = "accuracy"
-  )
-  
-  return(model)
-  
-}
-
-# Let this model compile and inspect its architecture
-
-alexnet <- alexnet_func()
-alexnet
-```
-
-```{r}
-hist <- alexnet %>% fit(
-  x = shuf_x_train,
-  y = shuf_yy_train,
-  batch_size = batch_size,
-  steps_per_epoch = (800*0.8) %/% batch_size,
-  epochs = epochs, 
-  class_weight = class_weight,
-  validation_split = 0.2,
-  verbose = 2
-)
-
-plot(hist)
-```
-
-```{r}
-table(y[shuf_ind])
-```
-
-Need to generate new data to increase sample size.
-
-
-
 
