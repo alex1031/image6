@@ -109,7 +109,36 @@ for (i in 1:num_images) {
 input_shape = dim(x)[2:4]
 ```
 
-```{r building_model}
+```{r}
+# Default Model
+model_function_binary <- function(learning_rate = 0.001) {
+  
+  k_clear_session()
+  
+  model <- keras_model_sequential() %>%
+    layer_conv_2d(filters = 32, kernel_size = c(3,3), activation = 'relu', input_shape = input_shape) %>% 
+    layer_max_pooling_2d(pool_size = c(2, 2)) %>% 
+    layer_conv_2d(filters = 64, kernel_size = c(3,3), activation = 'relu') %>% 
+    layer_max_pooling_2d(pool_size = c(2, 2)) %>% 
+    layer_dropout(rate = 0.25) %>% 
+    layer_flatten() %>% 
+    layer_dense(units = 128, activation = 'relu') %>% 
+    layer_dropout(rate = 0.5) %>% 
+    layer_dense(units = 64) %>% 
+    layer_dropout(rate = 0.5) %>% 
+    layer_dense(units = 28, activation = 'softmax')
+  
+  model %>% compile(
+    loss = "binary_crossentropy",
+    optimizer = optimizer_adam(learning_rate = learning_rate),
+    metrics = "accuracy"
+  )
+  
+  return(model)
+  
+}
+
+# Categorical Crossentropy
 model_function <- function(learning_rate = 0.001) {
   
   k_clear_session()
@@ -137,9 +166,37 @@ model_function <- function(learning_rate = 0.001) {
   
 }
 
-# Let this model compile and inspect its architecture
+# RMSprop
+model_function_rmsprop <- function(learning_rate = 0.001) {
+  
+  k_clear_session()
+  
+  model <- keras_model_sequential() %>%
+    layer_conv_2d(filters = 32, kernel_size = c(3,3), activation = 'relu', input_shape = input_shape) %>% 
+    layer_max_pooling_2d(pool_size = c(2, 2)) %>% 
+    layer_conv_2d(filters = 64, kernel_size = c(3,3), activation = 'relu') %>% 
+    layer_max_pooling_2d(pool_size = c(2, 2)) %>% 
+    layer_dropout(rate = 0.25) %>% 
+    layer_flatten() %>% 
+    layer_dense(units = 128, activation = 'relu') %>% 
+    layer_dropout(rate = 0.5) %>% 
+    layer_dense(units = 64) %>% 
+    layer_dropout(rate = 0.5) %>% 
+    layer_dense(units = 28, activation = 'softmax')
+  
+  model %>% compile(
+    loss = "binary_crossentropy",
+    optimizer = optimizer_rmsprop(learning_rate = learning_rate),
+    metrics = "accuracy"
+  )
+  
+  return(model)
+  
+}
 
+model_binary <- model_function_binary()
 model_catent <- model_function()
+model_rmsprop <- model_function_rmsprop()
 ```
 
 ```{r training_data}
@@ -204,8 +261,8 @@ class_weight <- list(
 )
 ```
 
-```{r}
-hist <- model %>% fit(
+```{r fit_no_noise_catent}
+hist <- model_catent %>% fit(
   x = shuf_x_train,
   y = shuf_yy_train,
   batch_size = batch_size,
@@ -225,21 +282,13 @@ save_model_tf(model, "cnn")
 add_gaussian_noise <- function(images, mean = 0, sd = 0.1) {
   noisy_images <- array(0, dim = dim(images))
   for (i in 1:nrow(images)) {
-    noisy_images[i,,,] <- images[i,,,] + rnorm(1, mean, sd)
-  }
-  return(noisy_images)
-}
-
-add_gaussian_noise_2 <- function(images, mean = 0, sd = 0.1) {
-  noisy_images <- array(0, dim = dim(images))
-  for (i in 1:nrow(images)) {
     noisy_images[i, ] <- images[i,] + rnorm(1, mean, sd)
   }
   return(noisy_images)
 }
 ```
 
-```{r}
+```{r noise_02_categorical_crossentropy}
 noise_x = array(dim = c(num_images, 64, 64, 1))
 
 for (i in 1:num_images) {
@@ -251,8 +300,27 @@ noise_x_train <- array(noise_x_train, dim = c(dim(noise_x_train)[1], dim(noise_x
 
 x_train = abind(shuf_x_train, noise_x_train, along = 1)
 y_train = abind(shuf_yy_train, shuf_yy_train, along = 1)
+```
 
+```{r}
 hist <- model_catent %>% fit(
+  x = x_train,
+  y = y_train,
+  batch_size = batch_size,
+  steps_per_epoch = (dim(x_train)[1]*0.8) %/% batch_size,
+  class_weight = class_weight,
+  epochs = epochs, 
+  validation_split = 0.2,
+  verbose = 2
+)
+
+plot(hist)
+
+save_model_tf(model_catent, "cnn_catent_cweights_noise02")
+```
+
+```{r}
+hist <- model_binary %>% fit(
   x = x_train,
   y = y_train,
   batch_size = batch_size,
@@ -265,8 +333,30 @@ hist <- model_catent %>% fit(
 
 plot(hist)
 
-save_model_tf(model_catent, "cnn_catent")
+save_model_tf(model_binary, "cnn_binary_noise02")
 ```
+
+```{r noise_02_rmsprop_train}
+hist <- model_rmsprop %>% fit(
+  x = x_train,
+  y = y_train,
+  batch_size = batch_size,
+  steps_per_epoch = (dim(x_train)[1]*0.8) %/% batch_size,
+  #class_weight = class_weight,
+  epochs = epochs, 
+  validation_split = 0.2,
+  verbose = 2
+)
+
+plot(hist)
+
+save_model_tf(model_rmsprop, "cnn_rmsprop_noise02")
+```
+
+
+
+
+
 
 
 
