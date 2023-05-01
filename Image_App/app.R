@@ -10,6 +10,7 @@ library(shiny)
 library(shinydashboard)
 library(rdrop2)
 #library(keras)
+library(EBImage)
 
 # Load the model
 #model <- load_model_tf("cnn/")
@@ -84,16 +85,17 @@ ui <- fluidPage(
                ),
                mainPanel(
                  # Output: Histogram ----
-                 #textOutput(outputId = "prediction"),
-                 #plotOutput(outputId = "image")),
+                 textOutput(outputId = "prediction"),
+                 plotOutput(outputId = "image"),
                  
-               actionButton("change", "change")
+               actionButton("change", "change"))
                
              )
     )
   )
 )
-)
+
+
 
 server <- function(input, output) {
   
@@ -104,17 +106,17 @@ server <- function(input, output) {
     
     image <- reactive({
       req(input$file)
-      jpeg::readJPEG(input$file$datapath)
+      png::readPNG(input$file$datapath)
       
     })
     
-    #output$prediction <- renderText({
+    output$prediction <- renderText({
       
-      #img <- image() %>% 
-        #array_reshape(., dim = c(1, dim(.), 1))
+      img <- image() %>% 
+        array_reshape(., dim = c(1, dim(.), 1))
       
-      #paste0("The predicted class number is ", predict_classes(model, img))
-    ##})
+      paste0("The predicted class number is ", predict_classes(model, img))
+    })
     
     output$image <- renderPlot({
       plot(as.raster(image()))
