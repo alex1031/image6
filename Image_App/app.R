@@ -12,7 +12,7 @@ library(rdrop2)
 #library(keras)
 
 # Load the model
-#model <- load_model_tf("cnn-mnist/")
+#model <- load_model_tf("cnn/")
 
 
 ui <- fluidPage(
@@ -44,9 +44,8 @@ ui <- fluidPage(
                  sliderInput("noise-level", "Noise Levels:", min = 0, max = 1, value = 0.2)
                ),
                mainPanel(
-                 # Output: Histogram ----
-                 #textOutput(outputId = "prediction"),
-                 #plotOutput(outputId = "image")
+                 # 6 learning model 
+
                  )
                )
              ),
@@ -58,6 +57,7 @@ ui <- fluidPage(
                ),
                mainPanel(
                  # Output: Histogram ----
+                 # 6 learning model 
                  #textOutput(outputId = "prediction"),
                  #plotOutput(outputId = "image")
                  )
