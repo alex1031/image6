@@ -8,6 +8,7 @@
 #
 
 library(shiny)
+library(shinydashboard)
 library(rdrop2)
 
 ui <- fluidPage(
@@ -84,22 +85,19 @@ ui <- fluidPage(
                       sliderInput("resolution-demo", "Resolution", min = 1, max = 150, value = 55),
                       sliderInput("rotation-demo", "Rotation", min = 0, max = 360, value = 60)
                       ),
-               tags$head(
-                 tags$style(HTML('#run{background-color:orange}'))
-               ),
-               actionButton("run","Run")
+               actionButton("change", "change")
+              
              )
     )
   )
 )
 
 server <- function(input, output) {
-  output$plot <- renderPlot({
-    v <- terms()
-    wordcloud_rep(names(v), v, scale=c(4,0.5),
-                  min.freq = input$freq, max.words=input$max,
-                  colors=brewer.pal(8, "Dark2"))
+  randomVals <- eventReactive(input$change, {
+    runif(input$file)
   })
+  
+
   
 }
 
