@@ -109,15 +109,7 @@ for (i in 1:num_images) {
 input_shape = dim(x)[2:4]
 ```
 
-```{r}
-temp <- (imgs_masked_resize_64[[100]]@.Data) - mean((imgs_masked_resize_64[[1]]@.Data))
-
-display(temp, method = "raster")
-display(imgs_masked_resize_64[[100]], method = "raster")
-```
-
-
-```{r}
+```{r building_model}
 model_function <- function(learning_rate = 0.001) {
   
   k_clear_session()
@@ -147,11 +139,10 @@ model_function <- function(learning_rate = 0.001) {
 
 # Let this model compile and inspect its architecture
 
-model <- model_function()
-model
+model_catent <- model_function()
 ```
 
-```{r}
+```{r training_data}
 times = c()
 
 for (i in 1:length(labels)) {
@@ -177,7 +168,7 @@ shuf_yy_train <- yy[shuf_ind, ]
 shuf_yy_test <- yy[-shuf_ind, ]
 ```
 
-```{r}
+```{r class_weights}
 # Addressing class imbalance through using class weights
 clcount <- table(y[shuf_ind])
 
@@ -213,9 +204,7 @@ class_weight <- list(
 )
 ```
 
-
 ```{r}
-
 hist <- model %>% fit(
   x = shuf_x_train,
   y = shuf_yy_train,
@@ -228,5 +217,61 @@ hist <- model %>% fit(
 )
 
 plot(hist)
+
+save_model_tf(model, "cnn")
 ```
+
+```{r noise}
+add_gaussian_noise <- function(images, mean = 0, sd = 0.1) {
+  noisy_images <- array(0, dim = dim(images))
+  for (i in 1:nrow(images)) {
+    noisy_images[i,,,] <- images[i,,,] + rnorm(1, mean, sd)
+  }
+  return(noisy_images)
+}
+
+add_gaussian_noise_2 <- function(images, mean = 0, sd = 0.1) {
+  noisy_images <- array(0, dim = dim(images))
+  for (i in 1:nrow(images)) {
+    noisy_images[i, ] <- images[i,] + rnorm(1, mean, sd)
+  }
+  return(noisy_images)
+}
+```
+
+```{r}
+noise_x = array(dim = c(num_images, 64, 64, 1))
+
+for (i in 1:num_images) {
+  noise_x[i,,,1] <- add_gaussian_noise_2(imgs_masked_resize_64[[i]]@.Data - mean(imgs_masked_resize_64[[i]]@.Data), mean = 0.2)
+}
+
+noise_x_train = noise_x[shuf_ind, , ,]
+noise_x_train <- array(noise_x_train, dim = c(dim(noise_x_train)[1], dim(noise_x_train)[2], dim(noise_x_train)[3], 1))
+
+x_train = abind(shuf_x_train, noise_x_train, along = 1)
+y_train = abind(shuf_yy_train, shuf_yy_train, along = 1)
+
+hist <- model_catent %>% fit(
+  x = x_train,
+  y = y_train,
+  batch_size = batch_size,
+  steps_per_epoch = (dim(x_train)[1]*0.8) %/% batch_size,
+  #class_weight = class_weight,
+  epochs = epochs, 
+  validation_split = 0.2,
+  verbose = 2
+)
+
+plot(hist)
+
+save_model_tf(model_catent, "cnn_catent")
+```
+
+
+
+
+
+
+
 
