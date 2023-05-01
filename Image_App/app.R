@@ -12,7 +12,7 @@ library(rdrop2)
 #library(keras)
 
 # Load the model
-#model <- load_model_tf("cnn-mnist/")
+#model <- load_model_tf("cnn/")
 
 
 ui <- fluidPage(
