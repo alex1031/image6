@@ -111,7 +111,7 @@ input_shape = dim(x)[2:4]
 
 ```{r}
 # Default Model
-model_function_binary <- function(learning_rate = 0.001) {
+model_function_binary <- function(learning_rate = 0.0001) {
   
   k_clear_session()
   
@@ -139,7 +139,7 @@ model_function_binary <- function(learning_rate = 0.001) {
 }
 
 # Categorical Crossentropy
-model_function <- function(learning_rate = 0.001) {
+model_function <- function(learning_rate = 0.0001) {
   
   k_clear_session()
   
@@ -167,7 +167,7 @@ model_function <- function(learning_rate = 0.001) {
 }
 
 # RMSprop
-model_function_rmsprop <- function(learning_rate = 0.001) {
+model_function_rmsprop <- function(learning_rate = 0.0001) {
   
   k_clear_session()
   
@@ -296,26 +296,23 @@ add_gaussian_noise <- function(images, mean = 0, sd = 0.1) {
 ```
 
 ```{r noise_02_categorical_crossentropy}
+# Only apply noise to training set
 noise_x = array(dim = c(num_images, 64, 64, 1))
 
 for (i in 1:num_images) {
   noise_x[i,,,1] <- add_gaussian_noise(imgs_masked_resize_64[[i]]@.Data - mean(imgs_masked_resize_64[[i]]@.Data), mean = 0.2)
 }
 
-# Binds training set with noise to original set,
-noise_x_train = abind(x, noise_x, along = 1)
+# Choose from noise set, we only apply noise to the training set
+# Same indicies as shuf_x_train
+noise_x = noise_x[shuf_ind, , ,]
+noise_x <- array(noise_x, dim = c(dim(noise_x)[1], dim(noise_x)[2], dim(noise_x)[3], 1))
 
-# New shuffle indicies
-set.seed(68)
-noise_shuf_ind = sample(1:dim(x)[1], dim(x)[1]*0.8)
-
-# Shuffle new training dataset
-noise_x_train = noise_x[noise_shuf_ind, , ,]
-noise_x_train <- array(noise_x_train, dim = c(dim(noise_x_train)[1], dim(noise_x_train)[2], dim(noise_x_train)[3], 1))
+# Combine both,
+noise_x_train = abind(shuf_x_train, noise_x, along = 1)
 
 # New training y set by doubling original y train and shuffle indicies
-noise_y <- abind(yy, yy, along = 1)
-noise_y_train <- noise_y[noise_shuf_ind, ]
+noise_y_train <- abind(shuf_yy_train, shuf_yy_train, along = 1)
 ```
 
 ```{r}
@@ -342,17 +339,18 @@ plot(hist)
 model_binary <- model_function_binary()
 
 hist <- model_binary %>% fit(
-  x = x_train,
-  y = y_train,
+  x = noise_x_train,
+  y = noise_y_train,
   batch_size = batch_size,
-  steps_per_epoch = (dim(x_train)[1]*0.8) %/% batch_size,
+  steps_per_epoch = (dim(noise_x_train)[1]*0.8) %/% batch_size,
   #class_weight = class_weight,
-  epochs = epochs, 
-  validation_split = 0.2,
+  epochs = epochs,
+  #validation_split = 0.2,
+  validation_data = list(shuf_x_test, shuf_yy_test),
   verbose = 2
 )
 
-plot(hist, main = "Learning Curve for Model with Binary Cross Entropy")
+plot(hist)
 
 # save_model_tf(model_binary, "cnn_binary_noise02")
 ```
