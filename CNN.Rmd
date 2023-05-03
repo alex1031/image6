@@ -91,7 +91,7 @@ for (i in 1:length(labels)) {
 ```{r}
 set.seed(63)
 library(keras)
-use_condaenv("r-reticulate", required=T)
+#use_condaenv("r-reticulate", required=T)
 tensorflow::set_random_seed(63)
 
 imgs_masked_resize_64 = do.call(c, cluster_imgs_masked_resized)
@@ -110,8 +110,9 @@ input_shape = dim(x)[2:4]
 ```
 
 ```{r}
+lr = 0.001
 # Default Model
-model_function_binary <- function(learning_rate = 0.0001) {
+model_function_binary <- function(learning_rate = lr) {
   
   k_clear_session()
   
@@ -139,7 +140,7 @@ model_function_binary <- function(learning_rate = 0.0001) {
 }
 
 # Categorical Crossentropy
-model_function <- function(learning_rate = 0.0001) {
+model_function <- function(learning_rate = lr) {
   
   k_clear_session()
   
@@ -167,7 +168,7 @@ model_function <- function(learning_rate = 0.0001) {
 }
 
 # RMSprop
-model_function_rmsprop <- function(learning_rate = 0.0001) {
+model_function_rmsprop <- function(learning_rate = lr) {
   
   k_clear_session()
   
@@ -343,16 +344,16 @@ hist <- model_binary %>% fit(
   y = noise_y_train,
   batch_size = batch_size,
   steps_per_epoch = (dim(noise_x_train)[1]*0.8) %/% batch_size,
-  #class_weight = class_weight,
+  class_weight = class_weight,
   epochs = epochs,
-  #validation_split = 0.2,
   validation_data = list(shuf_x_test, shuf_yy_test),
   verbose = 2
 )
 
 plot(hist)
 
-# save_model_tf(model_binary, "cnn_binary_noise02")
+#save_model_tf(model_binary, "cnn_binary_noise02")
+#save_model_tf(model_binary, "cnn_binary_cweights_noise02")
 ```
 
 ```{r noise_02_rmsprop_train}
