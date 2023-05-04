@@ -296,10 +296,15 @@ add_gaussian_noise <- function(images, mean = 0, sd = 0.1) {
 }
 ```
 
-```{r noise_02_categorical_crossentropy}
+```{r}
+temp <- add_gaussian_noise(imgs_masked_resize_64[[5]]@.Data - mean(imgs_masked_resize_64[[5]]@.Data), mean = 0.2)
+display(temp, method = "raster")
+```
+
+```{r noise_training_02}
 # Only apply noise to training set
 noise_x = array(dim = c(num_images, 64, 64, 1))
-
+set.seed(20)
 for (i in 1:num_images) {
   noise_x[i,,,1] <- add_gaussian_noise(imgs_masked_resize_64[[i]]@.Data - mean(imgs_masked_resize_64[[i]]@.Data), mean = 0.2)
 }
@@ -316,26 +321,28 @@ noise_x_train = abind(shuf_x_train, noise_x, along = 1)
 noise_y_train <- abind(shuf_yy_train, shuf_yy_train, along = 1)
 ```
 
-```{r}
+```{r noise_04_catent}
+# test sets remain untouched
 model_catent <- model_function()
 
 hist <- model_catent %>% fit(
-  x = x_train,
-  y = y_train,
+  x = noise_x_train,
+  y = noise_y_train,
   batch_size = batch_size,
-  steps_per_epoch = (dim(x_train)[1]*0.8) %/% batch_size,
+  steps_per_epoch = (dim(noise_x_train)[1]*0.8) %/% batch_size,
   class_weight = class_weight,
-  epochs = epochs, 
-  validation_split = 0.2,
+  epochs = epochs,
+  validation_data = list(shuf_x_test, shuf_yy_test),
   verbose = 2
 )
 
 plot(hist)
 
-#save_model_tf(model_catent, "cnn_catent_cweights_noise02")
+#save_model_tf(model_catent, "models/cnn_catent_noise02")
+#save_model_tf(model_catent, "models/cnn_catent_cweights_noise02")
 ```
 
-```{r}
+```{r noise_02_binary}
 # Binary Model with and without class weights
 model_binary <- model_function_binary()
 
@@ -352,32 +359,113 @@ hist <- model_binary %>% fit(
 
 plot(hist)
 
-#save_model_tf(model_binary, "cnn_binary_noise02")
-#save_model_tf(model_binary, "cnn_binary_cweights_noise02")
+#save_model_tf(model_binary, "models/cnn_binary_noise02")
+#save_model_tf(model_binary, "models/cnn_binary_cweights_noise02")
 ```
 
-```{r noise_02_rmsprop_train}
+```{r noise_02_rmsprop}
 model_rmsprop <- model_function_rmsprop()
 
 hist <- model_rmsprop %>% fit(
-  x = x_train,
-  y = y_train,
+  x = noise_x_train,
+  y = noise_y_train,
   batch_size = batch_size,
-  steps_per_epoch = (dim(x_train)[1]*0.8) %/% batch_size,
-  epochs = epochs, 
-  validation_split = 0.2,
+  steps_per_epoch = (dim(noise_x_train)[1]*0.8) %/% batch_size,
+  class_weight = class_weight,
+  epochs = epochs,
+  validation_data = list(shuf_x_test, shuf_yy_test),
   verbose = 2
 )
 
 plot(hist)
 
-save_model_tf(model_rmsprop, "cnn_rmsprop_noise02")
+#save_model_tf(model_rmsprop, "models/cnn_rmsprop_cweights_noise02")
+#save_model_tf(model_rmsprop, "models/cnn_rmsprop_noise02")
 ```
 
+## 0.4 mean gaussian noise
 
+```{r}
+temp <- add_gaussian_noise(imgs_masked_resize_64[[5]]@.Data - mean(imgs_masked_resize_64[[5]]@.Data), mean = 0.4)
+display(temp, method = "raster")
+```
 
+```{r noise_training_04}
+noise_x = array(dim = c(num_images, 64, 64, 1))
 
+set.seed(40)
+for (i in 1:num_images) {
+  noise_x[i,,,1] <- add_gaussian_noise(imgs_masked_resize_64[[i]]@.Data - mean(imgs_masked_resize_64[[i]]@.Data), mean = 0.4)
+}
 
+noise_x = noise_x[shuf_ind, , ,]
+noise_x <- array(noise_x, dim = c(dim(noise_x)[1], dim(noise_x)[2], dim(noise_x)[3], 1))
+
+noise_x_train = abind(shuf_x_train, noise_x, along = 1)
+
+noise_y_train <- abind(shuf_yy_train, shuf_yy_train, along = 1)
+```
+
+```{r noise_04_catent}
+model_catent <- model_function()
+
+hist <- model_catent %>% fit(
+  x = noise_x_train,
+  y = noise_y_train,
+  batch_size = batch_size,
+  steps_per_epoch = (dim(noise_x_train)[1]*0.8) %/% batch_size,
+  #class_weight = class_weight,
+  epochs = epochs,
+  validation_data = list(shuf_x_test, shuf_yy_test),
+  verbose = 2
+)
+
+plot(hist)
+
+#save_model_tf(model_catent, "models/cnn_catent_noise04")
+#save_model_tf(model_catent, "models/cnn_catent_cweights_noise04")
+```
+
+```{r noise_04_binary}
+# Binary Model with and without class weights
+model_binary <- model_function_binary()
+
+hist <- model_binary %>% fit(
+  x = noise_x_train,
+  y = noise_y_train,
+  batch_size = batch_size,
+  steps_per_epoch = (dim(noise_x_train)[1]*0.8) %/% batch_size,
+  class_weight = class_weight,
+  epochs = epochs,
+  validation_data = list(shuf_x_test, shuf_yy_test),
+  verbose = 2
+)
+
+plot(hist)
+
+#save_model_tf(model_binary, "models/cnn_binary_noise04")
+#save_model_tf(model_binary, "models/cnn_binary_cweights_noise04")
+```
+
+```{r noise_04_rmsprop}
+model_rmsprop <- model_function_rmsprop()
+
+hist <- model_rmsprop %>% fit(
+  x = noise_x_train,
+  y = noise_y_train,
+  batch_size = batch_size,
+  steps_per_epoch = (dim(noise_x_train)[1]*0.8) %/% batch_size,
+  class_weight = class_weight,
+  epochs = epochs,
+  validation_data = list(shuf_x_test, shuf_yy_test),
+  verbose = 2
+)
+
+plot(hist)
+
+#save_model_tf(model_rmsprop, "models/cnn_rmsprop_cweights_noise02")
+#save_model_tf(model_rmsprop, "models/cnn_rmsprop_noise02")
+```
 
 
 
