@@ -552,7 +552,7 @@ plot(hist)
 #save_model_tf(model_rmsprop, "models/cnn_rmsprop_res16")
 ```
 
-## 32x 32 resolution
+## 32x32 resolution
 
 ```{r}
 temp <- resize(imgs_masked_resize_64[[5]]@.Data - mean(imgs_masked_resize_64[[5]]@.Data), 32)
@@ -583,7 +583,7 @@ hist <- model_catent %>% fit(
   y = res_y_train,
   batch_size = batch_size,
   steps_per_epoch = (dim(res_x_train)[1]*0.8) %/% batch_size,
-  #class_weight = class_weight,
+  class_weight = class_weight,
   epochs = epochs,
   validation_data = list(shuf_x_test, shuf_yy_test),
   verbose = 2
@@ -634,6 +634,89 @@ plot(hist)
 
 #save_model_tf(model_rmsprop, "models/cnn_rmsprop_cweights_res32")
 #save_model_tf(model_rmsprop, "models/cnn_rmsprop_res32")
+```
+
+## Random resolution
+
+```{r res_training_rand}
+res_x = array(dim = c(num_images, 64, 64, 1))
+
+# Choose randomly from 16x16 or 32x32 resolution
+set.seed(48)
+res_ls = c(16, 32)
+res_choice = sample(1:2, num_images, replace=TRUE)
+
+for (i in 1:num_images) {
+  res_x[i,,,1] <- resize(imgs_masked_resize_64[[i]]@.Data - mean(imgs_masked_resize_64[[i]]@.Data), res_ls[res_choice[i]])
+}
+
+res_x = res_x[shuf_ind, , ,]
+res_x <- array(res_x, dim = c(dim(res_x)[1], dim(res_x)[2], dim(res_x)[3], 1))
+
+res_x_train = abind(shuf_x_train, res_x, along = 1)
+
+res_y_train <- abind(shuf_yy_train, shuf_yy_train, along = 1)
+```
+
+```{r res_rand_catent}
+model_catent <- model_function()
+
+hist <- model_catent %>% fit(
+  x = res_x_train,
+  y = res_y_train,
+  batch_size = batch_size,
+  steps_per_epoch = (dim(res_x_train)[1]*0.8) %/% batch_size,
+  class_weight = class_weight,
+  epochs = epochs,
+  validation_data = list(shuf_x_test, shuf_yy_test),
+  verbose = 2
+)
+
+plot(hist)
+
+#save_model_tf(model_catent, "models/cnn_catent_res_rand")
+#save_model_tf(model_catent, "models/cnn_catent_cweights_res_rand")
+```
+
+```{r res_rand_binary}
+# Binary Model with and without class weights
+model_binary <- model_function_binary()
+
+hist <- model_binary %>% fit(
+  x = res_x_train,
+  y = res_y_train,
+  batch_size = batch_size,
+  steps_per_epoch = (dim(res_x_train)[1]*0.8) %/% batch_size,
+  class_weight = class_weight,
+  epochs = epochs,
+  validation_data = list(shuf_x_test, shuf_yy_test),
+  verbose = 2
+)
+
+plot(hist)
+
+#save_model_tf(model_binary, "models/cnn_binary_res_rand")
+#save_model_tf(model_binary, "models/cnn_binary_cweights_res_rand")
+```
+
+```{r res_rand_rmsprop}
+model_rmsprop <- model_function_rmsprop()
+
+hist <- model_rmsprop %>% fit(
+  x = res_x_train,
+  y = res_y_train,
+  batch_size = batch_size,
+  steps_per_epoch = (dim(res_x_train)[1]*0.8) %/% batch_size,
+  class_weight = class_weight,
+  epochs = epochs,
+  validation_data = list(shuf_x_test, shuf_yy_test),
+  verbose = 2
+)
+
+plot(hist)
+
+save_model_tf(model_rmsprop, "models/cnn_rmsprop_cweights_res_rand")
+#save_model_tf(model_rmsprop, "models/cnn_rmsprop_res_rand")
 ```
 
 # Model with rotation
