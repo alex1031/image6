@@ -761,7 +761,7 @@ hist <- model_catent %>% fit(
 plot(hist)
 
 #save_model_tf(model_catent, "models/cnn_catent_rotate90")
-save_model_tf(model_catent, "models/cnn_catent_cweights_rotate90")
+#save_model_tf(model_catent, "models/cnn_catent_cweights_rotate90")
 ```
 
 ```{r rotate_90_binary}
@@ -793,7 +793,7 @@ hist <- model_rmsprop %>% fit(
   y = rotate_y_train,
   batch_size = batch_size,
   steps_per_epoch = (dim(rotate_x_train)[1]*0.8) %/% batch_size,
-  #class_weight = class_weight,
+  class_weight = class_weight,
   epochs = epochs,
   validation_data = list(shuf_x_test, shuf_yy_test),
   verbose = 2
@@ -803,4 +803,88 @@ plot(hist)
 
 #save_model_tf(model_rmsprop, "models/cnn_rmsprop_cweights_rotate90")
 #save_model_tf(model_rmsprop, "models/cnn_rmsprop_rotate90")
+```
+
+## 180 Degree Rotation (Reflection on the x-axis)
+
+```{r}
+temp <- rotate(imgs_masked_resize_64[[5]]@.Data - mean(imgs_masked_resize_64[[5]]@.Data), 180)
+display(imgs_masked_resize_64[[5]]@.Data - mean(imgs_masked_resize_64[[5]]@.Data), method = "raster")
+display(temp, method = "raster")
+```
+
+```{r rotate_training_180}
+rotate_x = array(dim = c(num_images, 64, 64, 1))
+
+for (i in 1:num_images) {
+  rotate_x[i,,,1] <- rotate(imgs_masked_resize_64[[i]]@.Data - mean(imgs_masked_resize_64[[i]]@.Data), 180)
+}
+
+rotate_x = rotate_x[shuf_ind, , ,]
+rotate_x <- array(rotate_x, dim = c(dim(rotate_x)[1], dim(rotate_x)[2], dim(rotate_x)[3], 1))
+
+rotate_x_train = abind(shuf_x_train, rotate_x, along = 1)
+
+rotate_y_train <- abind(shuf_yy_train, shuf_yy_train, along = 1)
+```
+
+```{r rotate_180_catent}
+model_catent <- model_function()
+
+hist <- model_catent %>% fit(
+  x = rotate_x_train,
+  y = rotate_y_train,
+  batch_size = batch_size,
+  steps_per_epoch = (dim(rotate_x_train)[1]*0.8) %/% batch_size,
+  #class_weight = class_weight,
+  epochs = epochs,
+  validation_data = list(shuf_x_test, shuf_yy_test),
+  verbose = 2
+)
+
+plot(hist)
+
+save_model_tf(model_catent, "models/cnn_catent_rotate180")
+#save_model_tf(model_catent, "models/cnn_catent_cweights_rotate180")
+```
+
+```{r rotate_180_binary}
+# Binary Model with and without class weights
+model_binary <- model_function_binary()
+
+hist <- model_binary %>% fit(
+  x = rotate_x_train,
+  y = rotate_y_train,
+  batch_size = batch_size,
+  steps_per_epoch = (dim(rotate_x_train)[1]*0.8) %/% batch_size,
+  class_weight = class_weight,
+  epochs = epochs,
+  validation_data = list(shuf_x_test, shuf_yy_test),
+  verbose = 2
+)
+
+plot(hist)
+
+#save_model_tf(model_binary, "models/cnn_binary_rotate180")
+#save_model_tf(model_binary, "models/cnn_binary_cweights_rotate180")
+```
+
+```{r rotate_180_rmsprop}
+model_rmsprop <- model_function_rmsprop()
+
+hist <- model_rmsprop %>% fit(
+  x = rotate_x_train,
+  y = rotate_y_train,
+  batch_size = batch_size,
+  steps_per_epoch = (dim(rotate_x_train)[1]*0.8) %/% batch_size,
+  class_weight = class_weight,
+  epochs = epochs,
+  validation_data = list(shuf_x_test, shuf_yy_test),
+  verbose = 2
+)
+
+plot(hist)
+
+#save_model_tf(model_rmsprop, "models/cnn_rmsprop_rotate180")
+#save_model_tf(model_rmsprop, "models/cnn_rmsprop_cweights_rotate180")
 ```
