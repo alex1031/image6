@@ -624,7 +624,7 @@ hist <- model_catent %>% fit(
   y = res_y_train,
   batch_size = batch_size,
   steps_per_epoch = (dim(res_x_train)[1]*0.8) %/% batch_size,
-  class_weight = class_weight,
+  #class_weight = class_weight,
   epochs = epochs,
   validation_data = list(shuf_x_test, shuf_yy_test),
   verbose = 2
@@ -632,7 +632,7 @@ hist <- model_catent %>% fit(
 
 plot(hist)
 
-#save_model_tf(model_catent, "models/cnn_catent_res16")
+save_model_tf(model_catent, "models/cnn_catent_res16")
 #save_model_tf(model_catent, "models/cnn_catent_cweights_res16")
 ```
 
@@ -1052,7 +1052,7 @@ hist <- model_catent %>% fit(
 plot(hist)
 
 #save_model_tf(model_catent, "models/cnn_catent_rotate180")
-#save_model_tf(model_catent, "models/cnn_catent_cweights_rotate180")
+save_model_tf(model_catent, "models/cnn_catent_cweights_rotate180")
 ```
 
 ```{r rotate_180_binary}
