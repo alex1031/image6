@@ -1134,3 +1134,100 @@ plot(hist)
 #save_model_tf(model_rmsprop, "models/cnn_rmsprop_cweights_rotaterand")
 ```
 
+# Combined Model
+
+```{r combined_training}
+rotate_x = noise_x = res_x = array(dim = c(num_images, 64, 64, 1))
+
+set.seed(90)
+# Random Rotation
+angle = sample(1:359, num_images, replace=T)
+# Random Noise
+noise_ls = c(0.2, 0.4, 0.6, 0.8, 1)
+noise_level = sample(1:length(noise_ls), num_images, replace=T)
+# Random Resolution
+res_ls = c(16, 32)
+res_choice = sample(1:2, num_images, replace=TRUE)
+
+for (i in 1:num_images) {
+  rotate_x[i,,,1] <- resize(rotate(imgs_masked_resize_64[[i]]@.Data - mean(imgs_masked_resize_64[[i]]@.Data), 180), 64, 64)
+  noise_x[i,,,1] <- add_gaussian_noise(imgs_masked_resize_64[[i]]@.Data - mean(imgs_masked_resize_64[[i]]@.Data), mean = 0.2)
+  res_x[i,,,1] <- resize(imgs_masked_resize_64[[i]]@.Data - mean(imgs_masked_resize_64[[i]]@.Data), res_ls[res_choice[i]])
+}
+
+rotate_x = rotate_x[shuf_ind, , ,]
+rotate_x <- array(rotate_x, dim = c(dim(rotate_x)[1], dim(rotate_x)[2], dim(rotate_x)[3], 1))
+
+noise_x = noise_x[shuf_ind, , ,]
+noise_x <- array(noise_x, dim = c(dim(noise_x)[1], dim(noise_x)[2], dim(noise_x)[3], 1))
+
+res_x = res_x[shuf_ind, , ,]
+res_x <- array(res_x, dim = c(dim(res_x)[1], dim(res_x)[2], dim(res_x)[3], 1))
+
+comb_x_train = abind(shuf_x_train, rotate_x, noise_x, res_x, along = 1)
+
+comb_y_train <- abind(shuf_yy_train, shuf_yy_train, shuf_yy_train, shuf_yy_train, along = 1)
+```
+
+```{r comb_catent}
+model_catent <- model_function()
+
+hist <- model_catent %>% fit(
+  x = comb_x_train,
+  y = comb_y_train,
+  batch_size = batch_size,
+  steps_per_epoch = (dim(comb_x_train)[1]*0.8) %/% batch_size,
+  class_weight = class_weight,
+  epochs = epochs,
+  validation_data = list(shuf_x_test, shuf_yy_test),
+  verbose = 2
+)
+
+plot(hist)
+
+#save_model_tf(model_catent, "models/cnn_catent_comb")
+#save_model_tf(model_catent, "models/cnn_catent_cweights_comb")
+```
+
+```{r comb_binary}
+# Binary Model with and without class weights
+model_binary <- model_function_binary()
+
+hist <- model_binary %>% fit(
+  x = comb_x_train,
+  y = comb_y_train,
+  batch_size = batch_size,
+  steps_per_epoch = (dim(comb_x_train)[1]*0.8) %/% batch_size,
+  #class_weight = class_weight,
+  epochs = epochs,
+  validation_data = list(shuf_x_test, shuf_yy_test),
+  verbose = 2
+)
+
+plot(hist)
+
+save_model_tf(model_binary, "models/cnn_binary_comb")
+#save_model_tf(model_binary, "models/cnn_binary_cweights_comb")
+```
+
+```{r comb_rmsprop}
+model_rmsprop <- model_function_rmsprop()
+
+hist <- model_rmsprop %>% fit(
+  x = comb_x_train,
+  y = comb_y_train,
+  batch_size = batch_size,
+  steps_per_epoch = (dim(comb_x_train)[1]*0.8) %/% batch_size,
+  class_weight = class_weight,
+  epochs = epochs,
+  validation_data = list(shuf_x_test, shuf_yy_test),
+  verbose = 2
+)
+
+plot(hist)
+
+#save_model_tf(model_rmsprop, "models/cnn_rmsprop_cweights_comb")
+#save_model_tf(model_rmsprop, "models/cnn_rmsprop_comb")
+```
+
+
