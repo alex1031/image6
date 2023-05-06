@@ -263,7 +263,7 @@ class_weight <- list(
 
 # Model with no noise
 
-```{r fit_no_noise_catent}
+```{r default_catent}
 model_catent <- model_function()
 
 hist <- model_catent %>% fit(
@@ -271,7 +271,7 @@ hist <- model_catent %>% fit(
   y = shuf_yy_train,
   batch_size = batch_size,
   steps_per_epoch = (dim(shuf_x_train)[1]*0.8) %/% batch_size,
-  # class_weight = class_weight,
+  class_weight = class_weight,
   epochs = epochs, 
   validation_split = 0.2,
   verbose = 2
@@ -279,7 +279,49 @@ hist <- model_catent %>% fit(
 
 plot(hist)
 
-save_model_tf(model, "cnn")
+#save_model_tf(model_catent, "cnn_catent")
+#save_model_tf(model_catent, "cnn_catent_cweights")
+```
+
+```{r default_binary}
+# Binary Model with and without class weights
+model_binary <- model_function_binary()
+
+hist <- model_binary %>% fit(
+  x = shuf_x_train,
+  y = shuf_yy_train,
+  batch_size = batch_size,
+  steps_per_epoch = (dim(shuf_x_train)[1]*0.8) %/% batch_size,
+  class_weight = class_weight,
+  epochs = epochs,
+  validation_data = list(shuf_x_test, shuf_yy_test),
+  verbose = 2
+)
+
+plot(hist)
+
+#save_model_tf(model_binary, "models/cnn_binary")
+#save_model_tf(model_binary, "models/cnn_binary_cweights")
+```
+
+```{r default_rmsprop}
+model_rmsprop <- model_function_rmsprop()
+
+hist <- model_rmsprop %>% fit(
+  x = shuf_x_train,
+  y = shuf_yy_train,
+  batch_size = batch_size,
+  steps_per_epoch = (dim(shuf_x_train)[1]*0.8) %/% batch_size,
+  class_weight = class_weight,
+  epochs = epochs,
+  validation_data = list(shuf_x_test, shuf_yy_test),
+  verbose = 2
+)
+
+plot(hist)
+
+#save_model_tf(model_rmsprop, "models/cnn_rmsprop_cweights")
+#save_model_tf(model_rmsprop, "models/cnn_rmsprop")
 ```
 
 # Models with noise
