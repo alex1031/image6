@@ -13,7 +13,7 @@ library(keras)
 library(EBImage)
 
 # Load the model
-model <- load_model_tf("/Users/swyi/Desktop/image6-main/cnn")
+model <- load_model_tf("/Users/swyi/Desktop/image6-shiny/cnn_catent_cweights")
 
 
 ui <- fluidPage(
@@ -131,7 +131,7 @@ server <- function(input, output) {
   })
   
   output$image <- renderPlot({
-    display <- add_gaussian_noise(img_copy, mean = input$gnoise),
+    display <- add_gaussian_noise(img_copy, mean = input$gnoise)
     plot(as.raster(display))
   })
   
