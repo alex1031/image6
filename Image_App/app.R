@@ -81,55 +81,30 @@ ui <- fluidPage(
     tabPanel("Demonstration",
              fluidRow(
                column(4,
-                      fileInput("file", h3("File input")), 
+                      fileInput("file", h3("File input")),
+                      sliderInput("gnoise", label = "Gaussian Noise",
+                                  min = 0, max = 1, value = 0.2)
                ),
                mainPanel(
                  # Output: Histogram ----
                  plotOutput(outputId = "image"),
                  textOutput(outputId = "prediction"),
                  actionButton("change", "change"))
-                 
-               )
+               
              )
     )
+  )
 )
 
 
 server <- function(input, output) {
   
-  get_inside = function(cellID, img, cell_boundaries) {
-    
-    cell_boundary = cell_boundaries |>
-      filter(cell_id %in% cellID)
-    
-    # rescale the boundary according to the pixels
-    pixels = dim(img)
-    cell_boundary$vertex_x_scaled <- 1+((cell_boundary$vertex_x - min(cell_boundary$vertex_x))/0.2125)
-    cell_boundary$vertex_y_scaled <- 1+((cell_boundary$vertex_y - min(cell_boundary$vertex_y))/0.2125)
-    
-    # identify which pixels are inside or outside of the cell segment using inpolygon
-    pixel_locations = expand.grid(seq_len(nrow(img)), seq_len(ncol(img)))
-    
-    pixels_inside = inpolygon(x = pixel_locations[,1],
-                              y = pixel_locations[,2],
-                              xp = cell_boundary$vertex_x_scaled,
-                              yp = cell_boundary$vertex_y_scaled,
-                              boundary = TRUE)
-    
-    img_inside = img
-    img_inside@.Data <- matrix(pixels_inside, nrow = nrow(img), ncol = ncol(img))
-    
-    return(img_inside)
-  }
-  
-  mask_resize = function(img, img_inside, w = 50, h = 50) {
-    
-    img_mask = img*img_inside
-    
-    # then, transform the masked image to the same number of pixels, 50x50
-    img_mask_resized = resize(img_mask, w, h)
-    
-    return(img_mask_resized)
+  add_gaussian_noise <- function(images, mean = 0, sd = 0.1) {
+    noisy_images <- array(0, dim = dim(images))
+    for (i in 1:nrow(images)) {
+      noisy_images[i,] <- images[i,,,] + rnorm(1, mean, sd,)
+    }
+    return(noisy_images)
   }
   
   randomVals <- eventReactive(input$change, {
@@ -143,20 +118,21 @@ server <- function(input, output) {
   })
   
   output$prediction <- renderText({
-  
-  img <- image() %>% 
-  array_reshape(., dim = c(1, 64, 64, 1))
-  
-  img <- mask_resize(image(), image(), w=64, h=64)
-  img <- array_reshape(img(), dim = c(1, 64, 64, 1))
-  
-  
-  ## 
-  paste0("The predicted class number is ", predict(model, img))
+    
+    img <- resize(image(), 64, 64)
+    img_copy <- img
+    img <- array_reshape(img, dim = c(1, 64, 64, 1))
+    img <- img - mean(img)
+    
+    pred <- model |> predict(img)
+    pred_class = which.max(pred)
+    ## 
+    paste0("The predicted class number is ", pred_class)
   })
   
   output$image <- renderPlot({
-    plot(as.raster(image()))
+    display <- add_gaussian_noise(img_copy, mean = input$gnoise),
+    plot(as.raster(display))
   })
   
   
@@ -164,4 +140,5 @@ server <- function(input, output) {
 }
 
 shinyApp(ui = ui, server = server)
+
 
