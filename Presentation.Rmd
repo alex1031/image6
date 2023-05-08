@@ -1,5 +1,5 @@
 ---
-title: "Presentation Notes"
+title: "Presentation"
 subtitle: "..."
 author: "Image 6"
 output:
@@ -47,49 +47,69 @@ library(dplyr)
 ```
 
 
+## PROJECT CONTEXT 
 
-
-## General Overview 
-
-**BACKGROUND:**
+**Motivation:**
 
  
 
-**AIM:**
+**Robustness:**
 
 
+**Project Question:**
+- Q1: 
 
----
-
-## Data set 
-
-
-
-**DATA SET DESCRIPTION:**
-
+- Q2: 
 
 
 ---
 
 
+## DATASET
 
-## Initial Data Analysis (IDA)
+- what it is?
+- the data collection here
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+---
+
+
+## Pre-Processing 
+- workflow diagram of the pre-processing
+
+---
+class: segue-red
+
+# Baseline Model (no augmentations)
+
+
+.left[.footnote[
 
 ```
-
-.scroll-output[
-```{r}
-
+---
+class: segue
 ```
-]
+
+]]
+
+
+---
+
+
+## Data architecture/workflow of this baseline model
+
+
+---
+
+
+## Results without data augmentation
+
+
 
 
 ---
 class: segue-red
 
-# Model 1
+# Data Augmention
 
 
 .left[.footnote[
@@ -104,70 +124,66 @@ class: segue
 
 ---
 
-## 
+## Choice of Data Augmentations
 
-.pull-left[
-```{r, echo=FALSE}
-
-
-```
-]
+**Considered:**
 
 
-.pull-right[
-```{r, echo=FALSE}
+**Choose:**
+add literature review here
 
-```
-]
+- noise
 
----
+- rotation
 
-## 
-
-
-.pull-left[
-```{r, echo=FALSE}
-
-```
-]
-
-
-.pull-right[
-
-
-    
-]
-
----
-
-
-.scroll-output[.pull-right[
-```{r, echo=FALSE, message=FALSE}
-
-```
-]]
+- resolution
 
 
 ---
 
+## Data architecture/workflow of these models 
 
---
-
-.pull-right[.scroll-output[
-```{r message=FALSE, warning=FALSE, echo=FALSE}
-
-```
-
-
-]]
-
+- provide a workflow diagram 
 
 
 
 ---
-class: segue-yellow
 
-# Model 2
+## Noise PART A
+
+
+
+---
+
+## Noise PART B
+
+
+
+---
+
+## Rotation PART A
+
+
+---
+
+## Rotation PART B
+
+
+
+---
+
+## Resolution PART A
+
+
+---
+
+## Resolution PART B
+
+
+---
+class: segue-red
+
+# Combined Model
 
 
 .left[.footnote[
@@ -183,7 +199,45 @@ class: segue
 
 
 
-## Limitations of own analysis
+## Data architecture/workflow of this combined model
+
+- provide a workflow diagram 
+
+
+
+---
+
+## Results of combined model
+
+
+
+
+---
+
+## Interpretation
+
+
+
+
+---
+class: segue-red
+
+# Future Analysis
+
+
+.left[.footnote[
+
+```
+---
+class: segue
+```
+
+]]
+
+---
+
+
+## Limitations of our own analysis
 
 
 ---
@@ -195,7 +249,10 @@ class: segue
 
 ---
 
-## References (APA Style)
+## References
 
+
+Notes: 
+- 4 workflow diagram: pre-processing, baseline model, data augmentation models, combined model?
 
 

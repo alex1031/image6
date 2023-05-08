@@ -99,12 +99,9 @@ ui <- fluidPage(
 
 server <- function(input, output) {
   
-  add_gaussian_noise <- function(images, mean = 0, sd = 0.1) {
-    noisy_images <- array(0, dim = dim(images))
-    for (i in 1:nrow(images)) {
-      noisy_images[i,] <- images[i,,,] + rnorm(1, mean, sd,)
-    }
-    return(noisy_images)
+  add_gaussian_noise <- function(image, mean = 0, sd = 0.1) {
+    noisy_image <- image[1,,,] + rnorm(1, mean, sd)
+    return(noisy_image)
   }
   
   randomVals <- eventReactive(input$change, {
@@ -120,10 +117,9 @@ server <- function(input, output) {
   output$prediction <- renderText({
     
     img <- resize(image(), 64, 64)
-    img_copy <- img
     img <- array_reshape(img, dim = c(1, 64, 64, 1))
     img <- img - mean(img)
-    
+    #img <- add_gaussian_noise(img, mean = input$gnoise)
     pred <- model |> predict(img)
     pred_class = which.max(pred)
     ## 
@@ -131,8 +127,10 @@ server <- function(input, output) {
   })
   
   output$image <- renderPlot({
-    display <- add_gaussian_noise(img_copy, mean = input$gnoise)
-    plot(as.raster(display))
+    img <- resize(image(), 64, 64)
+    img <- array_reshape(img, dim = c(1, 64, 64, 1))
+    dis <- add_gaussian_noise(img, mean = input$gnoise)
+    display(dis, method="raster")
   })
   
   
