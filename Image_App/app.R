@@ -13,7 +13,8 @@ library(keras)
 library(EBImage)
 
 # Load the model
-model <- load_model_tf("../models/cnn_catent_cweights_comb")
+library(tensorflow)
+model <- load_model_tf("models/cnn/")
 
 
 ui <- fluidPage(
@@ -83,13 +84,17 @@ ui <- fluidPage(
                column(4,
                       fileInput("file", h3("File input")),
                       sliderInput("gnoise", label = "Gaussian Noise",
-                                  min = 0, max = 1, value = 0.2)
+                                  min = 0, max = 1, value = 0.2),
+                      sliderInput("demo_rotation", label = "Rotation",
+                                  min = 0, max = 359, value = 0),
+                      radioButtons("demo_resolution", label = "Resolution",
+                                  choices = list ("Default (64x64)" = 64, "16x16" = 16, "32x32" = 32),
+                                  selected = 64)
                ),
                mainPanel(
                  # Output: Histogram ----
                  plotOutput(outputId = "image"),
-                 textOutput(outputId = "prediction"),
-                 actionButton("change", "change"))
+                 textOutput(outputId = "prediction"))
                
              )
     )
@@ -99,40 +104,36 @@ ui <- fluidPage(
 
 server <- function(input, output) {
   
-  add_gaussian_noise <- function(images, mean = 0, sd = 0.1) {
-    noisy_images <- array(0, dim = dim(images))
-    for (i in 1:nrow(images)) {
-      noisy_images[i,] <- images[i,,,] + rnorm(1, mean, sd,)
-    }
-    return(noisy_images)
+  add_gaussian_noise <- function(image, mean = 0, sd = 0.1) {
+    set.seed(6)
+    img <- image[1,,,] + rnorm(1, mean, sd)
+    return(img)
   }
-  
-  randomVals <- eventReactive(input$change, {
-    runif(input$file)
-    
-  })
   
   image <- reactive({
     req(input$file)
     png::readPNG(input$file$datapath)
   })
   
-  output$prediction <- renderText({
+  #output$prediction <- renderText({
     
-    img <- resize(image(), 64, 64)
-    img_copy <- img
-    img <- array_reshape(img, dim = c(1, 64, 64, 1))
-    img <- img - mean(img)
+    #img <- resize(image(), 64, 64)
+    #img <- array_reshape(img, dim = c(1, 64, 64, 1))
+    #img <- img - mean(img)
     
-    pred <- model |> predict(img)
-    pred_class = which.max(pred)
+    #pred <- predict(model, img)
+    #pred_class = which.max(pred)
     ## 
-    paste0("The predicted class number is ", pred_class)
-  })
+    #paste0("The predicted class number is ", summary(model))
+  #})
   
   output$image <- renderPlot({
-    display <- add_gaussian_noise(img_copy, mean = input$gnoise)
-    plot(as.raster(display))
+    img <- resize(image(), 64, 64)
+    img <- array_reshape(img, dim = c(1, 64, 64, 1))
+    img <- add_gaussian_noise(img, mean = input$gnoise)
+    img <- rotate(img, input$demo_rotation)
+    img <- resize(img, as.integer(input$demo_resolution), as.integer(input$demo_resolution))
+    display(img, method = "raster")
   })
   
   
