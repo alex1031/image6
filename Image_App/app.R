@@ -13,7 +13,7 @@ library(keras)
 library(EBImage)
 
 # Load the model
-model <- load_model_tf("/Users/swyi/Desktop/image6-shiny/cnn_catent_cweights")
+model <- load_model_tf("../models/cnn_catent_cweights_comb")
 
 
 ui <- fluidPage(
