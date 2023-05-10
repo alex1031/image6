@@ -14,7 +14,7 @@ library(EBImage)
 
 # Load the model
 library(tensorflow)
-model <- load_model_tf("models/cnn/")
+
 
 
 ui <- fluidPage(
@@ -40,30 +40,34 @@ ui <- fluidPage(
              mainPanel(
              )),
     
-    tabPanel("Noise Levels",
-             sidebarLayout(
-               sidebarPanel(
-                 sliderInput("noise-level", "Noise Levels:", min = 0, max = 1, value = 0.2)
-               ),
-               mainPanel(
-                 # 6 learning model 
-                 
-               )
-             )
+    tabPanel("Gaussian Noise Levels",
+             titlePanel("Effect of Different Gaussian Noise Levels"),
+             
+             fluidRow(align = "center",
+             
+               column(width = 4, uiOutput(outputId = "original1")),
+               column(width = 4, uiOutput(outputId = "noise_low")),
+               column(width = 4, uiOutput(outputId = "noise_high"))
+               
+             ),
+             
+             textOutput(outputId = "noise_description")
+             
+             # Add histogram of validation loss?
     ),
     
     tabPanel("Image Resolution",
-             sidebarLayout(
-               sidebarPanel(
-                 sliderInput("resolution", "Resolution:", min = 1, max = 150, value = 55)
-               ),
-               mainPanel(
-                 # Output: Histogram ----
-                 # 6 learning model 
-                 #textOutput(outputId = "prediction"),
-                 #plotOutput(outputId = "image")
-               )
-             )
+             titlePanel("Effect of Different Image Resolution"),
+             
+             fluidRow(align = "center",
+                      
+                      column(width = 4, uiOutput(outputId = "original2")),
+                      column(width = 4, uiOutput(outputId = "resolution_low")),
+                      column(width = 4, uiOutput(outputId = "resolution_medium"))
+                      
+             ),
+             
+             textOutput(outputId = "resolution_description")
     ),
     
     tabPanel("Image Rotation",
@@ -80,6 +84,8 @@ ui <- fluidPage(
     ),
     
     tabPanel("Demonstration",
+             titlePanel("Demo"),
+             
              fluidRow(
                column(4,
                       fileInput("file", h3("File input")),
@@ -113,6 +119,93 @@ server <- function(input, output) {
   image <- reactive({
     req(input$file)
     png::readPNG(input$file$datapath)
+  })
+  
+  
+  output$original1 <- renderUI({
+    
+    tags$figure (
+      tags$img(
+        src = "original.png",
+        width = 300,
+        height = 300,
+        alt = "Original Image with no noise"
+      ),
+      tags$figcaption("Original Image")
+    )
+    
+  })
+  
+  output$original2 <- renderUI({
+    
+    tags$figure (
+      tags$img(
+        src = "original.png",
+        width = 300,
+        height = 300,
+        alt = "Original Image with no noise"
+      ),
+      tags$figcaption("Original Image")
+    )
+    
+  })
+  
+  output$noise_low <- renderUI({
+    
+    tags$figure (
+      tags$img(
+        src = "noise02_example.png",
+        width = 300,
+        height = 300,
+        alt = "Image with low noise"
+      ),
+      tags$figcaption("Low Noise (0.2)")
+    )
+    
+  })
+  
+  output$noise_high <- renderUI({
+    
+    tags$figure (
+      tags$img(
+        src = "noise08_example.png",
+        width = 300,
+        height = 300,
+        alt = "Image with high noise"
+      ),
+      tags$figcaption("High Noise (0.8)")
+    )
+    
+  })
+  
+  output$resolution_description <- renderText({print("Insert Description.")})
+  
+  output$resolution_low <- renderUI({
+    
+    tags$figure (
+      tags$img(
+        src = "res16_example.png",
+        width = 300,
+        height = 300,
+        alt = "Image with 16x16 resolution"
+      ),
+      tags$figcaption("16x16 Resolution")
+    )
+    
+  })
+  
+  output$resolution_medium <- renderUI({
+    
+    tags$figure (
+      tags$img(
+        src = "res32_example.png",
+        width = 300,
+        height = 300,
+        alt = "Image with 32x32 resolution"
+      ),
+      tags$figcaption("32x32 Resolution")
+    )
+    
   })
   
   #output$prediction <- renderText({
