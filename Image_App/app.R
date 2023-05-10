@@ -14,7 +14,7 @@ library(EBImage)
 
 # Load the model
 library(tensorflow)
-#model <- load_model_tf("models/cnn/")
+
 
 
 ui <- fluidPage(
@@ -121,11 +121,6 @@ server <- function(input, output) {
     png::readPNG(input$file$datapath)
   })
   
-  output$noise_description <- renderText({
-    
-    print("Insert Description.")
-    
-  })
   
   output$original1 <- renderUI({
     
