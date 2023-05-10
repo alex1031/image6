@@ -14,7 +14,7 @@ library(keras)
 library(EBImage)
 
 # Load the model and data
-# model <- load_model_tf("models/cnn")
+model <- load_model_tf("models/cnn")
 val_loss <- read.csv("val_loss.csv")
 
 ui <- fluidPage(
@@ -224,7 +224,7 @@ server <- function(input, output) {
     
     #pred <- predict(model, img)
     #pred_class = which.max(pred)
-    ## 
+     
     #paste0("The predicted class number is ", summary(model))
   #})
   
