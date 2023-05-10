@@ -1,4 +1,4 @@
-﻿model,noise_type,noise_level,Val Loss
+﻿model,noise_type,noise_level,val_loss
 Binary,gaussian,low,0.2238
 Binary w/class weights,gaussian,low,0.2188
 Category,gaussian,low,6.7022

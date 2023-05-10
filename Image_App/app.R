@@ -12,6 +12,7 @@ library(rdrop2)
 library(tidyverse)
 library(keras)
 library(EBImage)
+library(plotly)
 
 # Load the model and data
 model <- load_model_tf("models/cnn")
@@ -47,15 +48,20 @@ ui <- fluidPage(
              
                column(width = 4, uiOutput(outputId = "original1")),
                column(width = 4, uiOutput(outputId = "noise_low")),
-               column(width = 4, uiOutput(outputId = "noise_high"))
+               column(width = 4, uiOutput(outputId = "noise_high")),
+               textOutput(outputId = "noise_description")
                
              ),
              
-             textOutput(outputId = "noise_description"),
-             
-             titlePanel("Test")
-             
-             # Add histogram of validation loss?
+            titlePanel("Validation Loss Comparison"),
+            
+            fluidRow(
+              style = "border: 4px groove;",
+              align = "center",
+              column(width = 6, plotlyOutput(outputId = "noise_plot")),
+              column(width = 6, plotlyOutput(outputId = "noise_catent")),
+              textOutput(outputId = "noise_analysis")
+            )
     ),
     
     tabPanel("Image Resolution",
@@ -184,6 +190,35 @@ server <- function(input, output) {
     
     print("Insert Description.")
     
+  })
+  
+  output$noise_plot <- renderPlotly({
+    level_order <- c("none", "low", "high", "random")
+    
+    gaussian <- val_loss |> filter((noise_type == "gaussian" | noise_type == "none") & !grepl("Category", model))
+    
+    ggplotly(ggplot(data = gaussian, aes(x = factor(noise_level, level = level_order), y = val_loss, fill = model)) +
+      geom_bar(stat = "identity", position="dodge") +
+      xlab("Gaussian Noise Level") + ylab("Validation Loss") +
+      ggtitle("Comparison of Validation Loss on Model with Binary Cross-Entropy Loss and RMSprop Optimiser"))
+    
+  })
+  
+  output$noise_catent <- renderPlotly({
+    
+    level_order <- c("none", "low", "high", "random")
+    
+    gaussian_catent <- val_loss |> filter((noise_type == "gaussian" | noise_type == "none") & grepl("Category", model))
+    
+    ggplotly(ggplot(data = gaussian_catent, aes(x = factor(noise_level, level = level_order), y = val_loss, fill = model)) + 
+      geom_bar(stat = "identity", position="dodge") +
+      xlab("Gaussian Noise Level") + ylab("Validation Loss") +
+      ggtitle("Comparison of Validation Loss on Model with Categorical Cross-Entropy Loss"))
+    
+  })
+  
+  output$noise_analysis <- renderText({
+    print("Insert Analysis")
   })
   
   output$resolution_description <- renderText({print("Insert Description.")})
