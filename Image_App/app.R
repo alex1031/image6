@@ -9,13 +9,13 @@
 library(shiny)
 library(shinydashboard)
 library(rdrop2)
+library(tidyverse)
 library(keras)
 library(EBImage)
 
-# Load the model
-library(tensorflow)
-
-
+# Load the model and data
+# model <- load_model_tf("models/cnn")
+val_loss <- read.csv("val_loss.csv")
 
 ui <- fluidPage(
   
@@ -51,7 +51,9 @@ ui <- fluidPage(
                
              ),
              
-             textOutput(outputId = "noise_description")
+             textOutput(outputId = "noise_description"),
+             
+             titlePanel("Test")
              
              # Add histogram of validation loss?
     ),
@@ -175,6 +177,12 @@ server <- function(input, output) {
       ),
       tags$figcaption("High Noise (0.8)")
     )
+    
+  })
+  
+  output$noise_description <- renderText({
+    
+    print("Insert Description.")
     
   })
   
