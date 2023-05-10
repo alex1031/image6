@@ -13,7 +13,8 @@ library(keras)
 library(EBImage)
 
 # Load the model
-model <- load_model_tf("/Users/swyi/Desktop/image6-shiny/cnn_catent_cweights")
+library(tensorflow)
+#model <- load_model_tf("models/cnn/")
 
 
 ui <- fluidPage(
@@ -39,30 +40,34 @@ ui <- fluidPage(
              mainPanel(
              )),
     
-    tabPanel("Noise Levels",
-             sidebarLayout(
-               sidebarPanel(
-                 sliderInput("noise-level", "Noise Levels:", min = 0, max = 1, value = 0.2)
-               ),
-               mainPanel(
-                 # 6 learning model 
-                 
-               )
-             )
+    tabPanel("Gaussian Noise Levels",
+             titlePanel("Effect of Different Gaussian Noise Levels"),
+             
+             fluidRow(align = "center",
+             
+               column(width = 4, uiOutput(outputId = "original1")),
+               column(width = 4, uiOutput(outputId = "noise_low")),
+               column(width = 4, uiOutput(outputId = "noise_high"))
+               
+             ),
+             
+             textOutput(outputId = "noise_description")
+             
+             # Add histogram of validation loss?
     ),
     
     tabPanel("Image Resolution",
-             sidebarLayout(
-               sidebarPanel(
-                 sliderInput("resolution", "Resolution:", min = 1, max = 150, value = 55)
-               ),
-               mainPanel(
-                 # Output: Histogram ----
-                 # 6 learning model 
-                 #textOutput(outputId = "prediction"),
-                 #plotOutput(outputId = "image")
-               )
-             )
+             titlePanel("Effect of Different Image Resolution"),
+             
+             fluidRow(align = "center",
+                      
+                      column(width = 4, uiOutput(outputId = "original2")),
+                      column(width = 4, uiOutput(outputId = "resolution_low")),
+                      column(width = 4, uiOutput(outputId = "resolution_medium"))
+                      
+             ),
+             
+             textOutput(outputId = "resolution_description")
     ),
     
     tabPanel("Image Rotation",
@@ -79,17 +84,23 @@ ui <- fluidPage(
     ),
     
     tabPanel("Demonstration",
+             titlePanel("Demo"),
+             
              fluidRow(
                column(4,
                       fileInput("file", h3("File input")),
                       sliderInput("gnoise", label = "Gaussian Noise",
-                                  min = 0, max = 1, value = 0.2)
+                                  min = 0, max = 1, value = 0.2),
+                      sliderInput("demo_rotation", label = "Rotation",
+                                  min = 0, max = 359, value = 0),
+                      radioButtons("demo_resolution", label = "Resolution",
+                                  choices = list ("Default (64x64)" = 64, "16x16" = 16, "32x32" = 32),
+                                  selected = 64)
                ),
                mainPanel(
                  # Output: Histogram ----
                  plotOutput(outputId = "image"),
-                 textOutput(outputId = "prediction"),
-                 actionButton("change", "change"))
+                 textOutput(outputId = "prediction"))
                
              )
     )
@@ -99,40 +110,128 @@ ui <- fluidPage(
 
 server <- function(input, output) {
   
-  add_gaussian_noise <- function(images, mean = 0, sd = 0.1) {
-    noisy_images <- array(0, dim = dim(images))
-    for (i in 1:nrow(images)) {
-      noisy_images[i,] <- images[i,,,] + rnorm(1, mean, sd,)
-    }
-    return(noisy_images)
+  add_gaussian_noise <- function(image, mean = 0, sd = 0.1) {
+    set.seed(6)
+    img <- image[1,,,] + rnorm(1, mean, sd)
+    return(img)
   }
-  
-  randomVals <- eventReactive(input$change, {
-    runif(input$file)
-    
-  })
   
   image <- reactive({
     req(input$file)
     png::readPNG(input$file$datapath)
   })
   
-  output$prediction <- renderText({
+  output$noise_description <- renderText({
     
-    img <- resize(image(), 64, 64)
-    img_copy <- img
-    img <- array_reshape(img, dim = c(1, 64, 64, 1))
-    img <- img - mean(img)
+    print("Insert Description.")
     
-    pred <- model |> predict(img)
-    pred_class = which.max(pred)
-    ## 
-    paste0("The predicted class number is ", pred_class)
   })
   
+  output$original1 <- renderUI({
+    
+    tags$figure (
+      tags$img(
+        src = "original.png",
+        width = 300,
+        height = 300,
+        alt = "Original Image with no noise"
+      ),
+      tags$figcaption("Original Image")
+    )
+    
+  })
+  
+  output$original2 <- renderUI({
+    
+    tags$figure (
+      tags$img(
+        src = "original.png",
+        width = 300,
+        height = 300,
+        alt = "Original Image with no noise"
+      ),
+      tags$figcaption("Original Image")
+    )
+    
+  })
+  
+  output$noise_low <- renderUI({
+    
+    tags$figure (
+      tags$img(
+        src = "noise02_example.png",
+        width = 300,
+        height = 300,
+        alt = "Image with low noise"
+      ),
+      tags$figcaption("Low Noise (0.2)")
+    )
+    
+  })
+  
+  output$noise_high <- renderUI({
+    
+    tags$figure (
+      tags$img(
+        src = "noise08_example.png",
+        width = 300,
+        height = 300,
+        alt = "Image with high noise"
+      ),
+      tags$figcaption("High Noise (0.8)")
+    )
+    
+  })
+  
+  output$resolution_description <- renderText({print("Insert Description.")})
+  
+  output$resolution_low <- renderUI({
+    
+    tags$figure (
+      tags$img(
+        src = "res16_example.png",
+        width = 300,
+        height = 300,
+        alt = "Image with 16x16 resolution"
+      ),
+      tags$figcaption("16x16 Resolution")
+    )
+    
+  })
+  
+  output$resolution_medium <- renderUI({
+    
+    tags$figure (
+      tags$img(
+        src = "res32_example.png",
+        width = 300,
+        height = 300,
+        alt = "Image with 32x32 resolution"
+      ),
+      tags$figcaption("32x32 Resolution")
+    )
+    
+  })
+  
+  #output$prediction <- renderText({
+    
+    #img <- resize(image(), 64, 64)
+    #img <- array_reshape(img, dim = c(1, 64, 64, 1))
+    #img <- img - mean(img)
+    
+    #pred <- predict(model, img)
+    #pred_class = which.max(pred)
+    ## 
+    #paste0("The predicted class number is ", summary(model))
+  #})
+  
   output$image <- renderPlot({
-    display <- add_gaussian_noise(img_copy, mean = input$gnoise)
-    plot(as.raster(display))
+    img <- resize(image(), 64, 64)
+    img <- array_reshape(img, dim = c(1, 64, 64, 1))
+    img <- add_gaussian_noise(img, mean = input$gnoise)
+    img <- rotate(img, input$demo_rotation)
+    img <- resize(img, as.integer(input$demo_resolution), as.integer(input$demo_resolution))
+    display(img, method = "raster")
   })
   
   
