@@ -91,6 +91,21 @@ ui <- fluidPage(
              )
     ),
     
+    tabPanel("Visualisation",
+             titlePanel("Interactive Visualisation Learning Curve"),
+             
+             fluidRow(
+               column(4,
+                      selectizeInput("model_choice", "Model",
+                                     choices = list(`Binary` = "bin",
+                                                    `Binary w/class weights` = "bincweights",
+                                                    `Category` = "cat",
+                                                    `Category w/class weights` = "catcweights",
+                                                    `RMSprop` = "rms",
+                                                    `RMSprop w/class weights` = "rmscweights"), multiple = T))
+             )
+             ),
+    
     tabPanel("Demonstration",
              titlePanel("Demo"),
              
