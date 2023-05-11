@@ -49,17 +49,16 @@ library(dplyr)
 
 ## PROJECT CONTEXT 
 
-**Motivation:**
-
- 
-
-**Robustness:**
+**Motivation:** In scientific and medical research, accurate and reliable analysis of cell images can be crucial for understanding cellular structures & functions, diagnosing diseases, & developing new treatments. However, cell images can be affected by various factors leading to errors in image analysis & classification. 
 
 
-**Project Question:**
-- Q1: 
+**Robustness:** refers to the ability of an image analysis model or algorithm to maintain accurate & reliable results even in the presence of variations, noise, artifacts, or other disturbances in the input images. 
 
-- Q2: 
+
+**Project Questions:**
+- Q1: Investigating how the model's performance & robustness vary with different types & levels of noise levels, image resolution, & image artifacts. 
+
+- Q2: How can data augmentation be used to improve the robustness of the model to variations in input image quality?
 
 
 ---
@@ -70,16 +69,13 @@ library(dplyr)
 - what it is?
 - the data collection here
 
----
 
 
-## Pre-Processing 
-- workflow diagram of the pre-processing
 
 ---
 class: segue-red
 
-# Baseline Model (no augmentations)
+# Baseline Model 
 
 
 .left[.footnote[
@@ -95,13 +91,7 @@ class: segue
 ---
 
 
-## Data architecture/workflow of this baseline model
-
-
----
-
-
-## Results without data augmentation
+## WORKFLOW DIAGRAM 1
 
 
 
@@ -141,49 +131,24 @@ add literature review here
 
 ---
 
-## Data architecture/workflow of these models 
+## WORKFLOW DIAGRAM 2
 
 - provide a workflow diagram 
 
 
 
----
-
-## Noise PART A
-
-
 
 ---
 
-## Noise PART B
+## RESULTS
 
-
-
----
-
-## Rotation PART A
-
-
----
-
-## Rotation PART B
-
-
-
----
-
-## Resolution PART A
-
-
----
-
-## Resolution PART B
+Shiny App link
 
 
 ---
 class: segue-red
 
-# Combined Model
+# Conclusion
 
 
 .left[.footnote[
@@ -197,25 +162,7 @@ class: segue
 
 ---
 
-
-
-## Data architecture/workflow of this combined model
-
-- provide a workflow diagram 
-
-
-
----
-
-## Results of combined model
-
-
-
-
----
-
-## Interpretation
-
+## INTERPRETATION
 
 
 
@@ -237,22 +184,21 @@ class: segue
 ---
 
 
-## Limitations of our own analysis
+## LIMITATIONS
 
 
 ---
 
 
-## Future Study Recommendation
+## FUTURE STUDY 
 
 
 
 ---
 
-## References
+## REFERENCES
 
 
-Notes: 
-- 4 workflow diagram: pre-processing, baseline model, data augmentation models, combined model?
+
 
 
