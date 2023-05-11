@@ -1,7 +1,7 @@
 ---
-title: "Presentation"
-subtitle: "..."
-author: "Image 6"
+title: "Cell Classification Robustness (CCR)"
+subtitle: "Biotechnology - Image 6"
+author: "Semester 1 2023"
 output:
   xaringan::moon_reader:
     css: ["default", "Presentation_files/assets/sydney-fonts.css", "Presentation_files/assets/sydney.css"]
@@ -49,25 +49,24 @@ library(dplyr)
 
 ## PROJECT CONTEXT 
 
-**Motivation:** In scientific and medical research, accurate and reliable analysis of cell images can be crucial for understanding cellular structures & functions, diagnosing diseases, & developing new treatments. However, cell images can be affected by various factors leading to errors in image analysis & classification. 
+**Motivation:** Developing a robust computer vision tool, since cell images can be affected by various factors leading to errors in image analysis & classification (Rączkowski et al., 2019). 
 
 
-**Robustness:** refers to the ability of an image analysis model or algorithm to maintain accurate & reliable results even in the presence of variations, noise, artifacts, or other disturbances in the input images. 
+**Robustness:** refers to the ability of an image analysis model to maintain reliable results even in the presence of variations in the input images (Drenkow et al., n.d.). 
 
 
 **Project Questions:**
 - Q1: Investigating how the model's performance & robustness vary with different types & levels of noise levels, image resolution, & image artifacts. 
 
 - Q2: How can data augmentation be used to improve the robustness of the model to variations in input image quality?
-
-
 ---
 
 
 ## DATASET
 
-- what it is?
-- the data collection here
+- Biotechnology Data Bundle
+
+- [Biotechnology generate Images report](https://www.10xgenomics.com/resources/datasets/fresh-frozen-mouse-brain-for-xenium-explorer-demo-1-standard)
 
 
 
@@ -81,8 +80,6 @@ class: segue-red
 .left[.footnote[
 
 ```
----
-class: segue
 ```
 
 ]]
@@ -105,8 +102,7 @@ class: segue-red
 .left[.footnote[
 
 ```
----
-class: segue
+
 ```
 
 ]]
@@ -115,12 +111,6 @@ class: segue
 ---
 
 ## Choice of Data Augmentations
-
-**Considered:**
-
-
-**Choose:**
-add literature review here
 
 - noise
 
@@ -154,8 +144,7 @@ class: segue-red
 .left[.footnote[
 
 ```
----
-class: segue
+
 ```
 
 ]]
@@ -175,8 +164,7 @@ class: segue-red
 .left[.footnote[
 
 ```
----
-class: segue
+
 ```
 
 ]]
