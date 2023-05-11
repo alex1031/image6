@@ -110,7 +110,7 @@ ui <- fluidPage(
              titlePanel("Demo"),
              
              fluidRow(
-               column(5,
+               column(4,
                       fileInput("file", h3("File input")),
                       sliderInput("gnoise", label = "Gaussian Noise",
                                   min = 0, max = 1, value = 0.2),
