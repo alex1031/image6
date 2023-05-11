@@ -776,6 +776,10 @@ hist <- model_catent %>% fit(
 
 plot(hist)
 
+tempdf <- data.frame(hist$metrics)
+#write.csv(tempdf, "Image_App/models/cnn_catent_res32/training.csv")
+#write.csv(tempdf, "Image_App/models/cnn_catent_cweights_res32/training.csv")
+
 #save_model_tf(model_catent, "models/cnn_catent_res32")
 #save_model_tf(model_catent, "models/cnn_catent_cweights_res32")
 ```
@@ -797,6 +801,10 @@ hist <- model_binary %>% fit(
 
 plot(hist)
 
+tempdf <- data.frame(hist$metrics)
+#write.csv(tempdf, "Image_App/models/cnn_binary_res32/training.csv")
+#write.csv(tempdf, "Image_App/models/cnn_binary_cweights_res32/training.csv")
+
 #save_model_tf(model_binary, "models/cnn_binary_res32")
 #save_model_tf(model_binary, "models/cnn_binary_cweights_res32")
 ```
@@ -809,13 +817,17 @@ hist <- model_rmsprop %>% fit(
   y = res_y_train,
   batch_size = batch_size,
   steps_per_epoch = (dim(res_x_train)[1]*0.8) %/% batch_size,
-  #class_weight = class_weight,
+  class_weight = class_weight,
   epochs = epochs,
   validation_data = list(shuf_x_test, shuf_yy_test),
   verbose = 2
 )
 
 plot(hist)
+
+tempdf <- data.frame(hist$metrics)
+#write.csv(tempdf, "Image_App/models/cnn_rmsprop_res32/training.csv")
+#write.csv(tempdf, "Image_App/models/cnn_rmsprop_cweights_res32/training.csv")
 
 #save_model_tf(model_rmsprop, "models/cnn_rmsprop_cweights_res32")
 #save_model_tf(model_rmsprop, "models/cnn_rmsprop_res32")
@@ -1028,6 +1040,10 @@ hist <- model_catent %>% fit(
 
 plot(hist)
 
+tempdf <- data.frame(hist$metrics)
+#write.csv(tempdf, "Image_App/models/cnn_catent_rotate90/training.csv")
+write.csv(tempdf, "Image_App/models/cnn_catent_cweights_rotate90/training.csv")
+
 #save_model_tf(model_catent, "models/cnn_catent_rotate90")
 #save_model_tf(model_catent, "models/cnn_catent_cweights_rotate90")
 ```
@@ -1049,6 +1065,10 @@ hist <- model_binary %>% fit(
 
 plot(hist)
 
+tempdf <- data.frame(hist$metrics)
+#write.csv(tempdf, "Image_App/models/cnn_binary_rotate90/training.csv")
+write.csv(tempdf, "Image_App/models/cnn_binary_cweights_rotate90/training.csv")
+
 #save_model_tf(model_binary, "models/cnn_binary_rotate90")
 #save_model_tf(model_binary, "models/cnn_binary_cweights_rotate90")
 ```
@@ -1068,6 +1088,10 @@ hist <- model_rmsprop %>% fit(
 )
 
 plot(hist)
+
+tempdf <- data.frame(hist$metrics)
+#write.csv(tempdf, "Image_App/models/cnn_rmsprop_rotate90/training.csv")
+write.csv(tempdf, "Image_App/models/cnn_rmsprop_cweights_rotate90/training.csv")
 
 #save_model_tf(model_rmsprop, "models/cnn_rmsprop_cweights_rotate90")
 #save_model_tf(model_rmsprop, "models/cnn_rmsprop_rotate90")
