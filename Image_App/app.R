@@ -45,23 +45,23 @@ ui <- fluidPage(
              titlePanel("Effect of Different Gaussian Noise Levels"),
              
              fluidRow(align = "center",
-             
-               column(width = 4, uiOutput(outputId = "original1")),
-               column(width = 4, uiOutput(outputId = "noise_low")),
-               column(width = 4, uiOutput(outputId = "noise_high")),
-               textOutput(outputId = "noise_description")
-               
+                      
+                      column(width = 4, uiOutput(outputId = "original1")),
+                      column(width = 4, uiOutput(outputId = "noise_low")),
+                      column(width = 4, uiOutput(outputId = "noise_high")),
+                      textOutput(outputId = "noise_description")
+                      
              ),
              
-            titlePanel("Validation Loss Comparison"),
-            
-            fluidRow(
-              style = "border: 4px groove;",
-              align = "center",
-              column(width = 6, plotlyOutput(outputId = "noise_plot")),
-              column(width = 6, plotlyOutput(outputId = "noise_catent")),
-              textOutput(outputId = "noise_analysis")
-            )
+             titlePanel("Validation Loss Comparison"),
+             
+             fluidRow(
+               style = "border: 4px groove;",
+               align = "center",
+               column(width = 6, plotlyOutput(outputId = "noise_plot")),
+               column(width = 6, plotlyOutput(outputId = "noise_catent")),
+               textOutput(outputId = "noise_analysis")
+             )
     ),
     
     tabPanel("Image Resolution",
@@ -104,21 +104,22 @@ ui <- fluidPage(
                                                     `RMSprop` = "rms",
                                                     `RMSprop w/class weights` = "rmscweights"), multiple = T))
              )
-             ),
+    ),
     
     tabPanel("Demonstration",
              titlePanel("Demo"),
              
              fluidRow(
-               column(4,
+               column(5,
                       fileInput("file", h3("File input")),
                       sliderInput("gnoise", label = "Gaussian Noise",
                                   min = 0, max = 1, value = 0.2),
                       sliderInput("demo_rotation", label = "Rotation",
                                   min = 0, max = 359, value = 0),
                       radioButtons("demo_resolution", label = "Resolution",
-                                  choices = list ("Default (64x64)" = 64, "16x16" = 16, "32x32" = 32),
-                                  selected = 64)
+                                   choices = list ("Default (64x64)" = 64, "16x16" = 16, "32x32" = 32),
+                                   selected = 64),
+                      actionButton("reset_input", "Reset inputs")
                ),
                mainPanel(
                  # Output: Histogram ----
@@ -131,7 +132,7 @@ ui <- fluidPage(
 )
 
 
-server <- function(input, output) {
+server <- function(input, output, session) {
   
   add_gaussian_noise <- function(image, mean = 0, sd = 0.1) {
     set.seed(6)
@@ -213,9 +214,9 @@ server <- function(input, output) {
     gaussian <- val_loss |> filter((noise_type == "gaussian" | noise_type == "none") & !grepl("Category", model))
     
     ggplotly(ggplot(data = gaussian, aes(x = factor(noise_level, level = level_order), y = val_loss, fill = model)) +
-      geom_bar(stat = "identity", position="dodge") +
-      xlab("Gaussian Noise Level") + ylab("Validation Loss") +
-      ggtitle("Comparison of Validation Loss on Model with Binary Cross-Entropy Loss and RMSprop Optimiser"))
+               geom_bar(stat = "identity", position="dodge") +
+               xlab("Gaussian Noise Level") + ylab("Validation Loss") +
+               ggtitle("Comparison of Validation Loss on Model with Binary Cross-Entropy Loss and RMSprop Optimiser"))
     
   })
   
@@ -226,9 +227,9 @@ server <- function(input, output) {
     gaussian_catent <- val_loss |> filter((noise_type == "gaussian" | noise_type == "none") & grepl("Category", model))
     
     ggplotly(ggplot(data = gaussian_catent, aes(x = factor(noise_level, level = level_order), y = val_loss, fill = model)) + 
-      geom_bar(stat = "identity", position="dodge") +
-      xlab("Gaussian Noise Level") + ylab("Validation Loss") +
-      ggtitle("Comparison of Validation Loss on Model with Categorical Cross-Entropy Loss"))
+               geom_bar(stat = "identity", position="dodge") +
+               xlab("Gaussian Noise Level") + ylab("Validation Loss") +
+               ggtitle("Comparison of Validation Loss on Model with Categorical Cross-Entropy Loss"))
     
   })
   
@@ -267,15 +268,15 @@ server <- function(input, output) {
   })
   
   #output$prediction <- renderText({
-    
-    #img <- resize(image(), 64, 64)
-    #img <- array_reshape(img, dim = c(1, 64, 64, 1))
-    #img <- img - mean(img)
-    
-    #pred <- predict(model, img)
-    #pred_class = which.max(pred)
-     
-    #paste0("The predicted class number is ", summary(model))
+  
+  #img <- resize(image(), 64, 64)
+  #img <- array_reshape(img, dim = c(1, 64, 64, 1))
+  #img <- img - mean(img)
+  
+  #pred <- predict(model, img)
+  #pred_class = which.max(pred)
+  
+  #paste0("The predicted class number is ", summary(model))
   #})
   
   output$image <- renderPlot({
@@ -285,6 +286,13 @@ server <- function(input, output) {
     img <- rotate(img, input$demo_rotation)
     img <- resize(img, as.integer(input$demo_resolution), as.integer(input$demo_resolution))
     display(img, method = "raster")
+  })
+  
+  observeEvent(input$reset_input, {
+    updateSliderInput(session,"gnoise", value = 0.2)          
+    updateSliderInput(session,"demo_rotation", value = 0)
+    updateRadioButtons(session,"demo_resolution", selected = 64 )
+    
   })
   
   
