@@ -394,7 +394,7 @@ plot(hist)
 
 tempdf <- data.frame(hist$metrics)
 #write.csv(tempdf, "Image_App/models/cnn_catent_noise02/training.csv")
-write.csv(tempdf, "Image_App/models/cnn_catent_cweights_noise02/training.csv")
+#write.csv(tempdf, "Image_App/models/cnn_catent_cweights_noise02/training.csv")
 
 #save_model_tf(model_catent, "models/cnn_catent_noise02")
 #save_model_tf(model_catent, "models/cnn_catent_cweights_noise02")
@@ -488,6 +488,10 @@ hist <- model_catent %>% fit(
 
 plot(hist)
 
+tempdf <- data.frame(hist$metrics)
+#write.csv(tempdf, "Image_App/models/cnn_catent_noise08/training.csv")
+#write.csv(tempdf, "Image_App/models/cnn_catent_cweights_noise08/training.csv")
+
 #save_model_tf(model_catent, "models/cnn_catent_noise08")
 #save_model_tf(model_catent, "models/cnn_catent_cweights_noise08")
 ```
@@ -508,6 +512,10 @@ hist <- model_binary %>% fit(
 )
 
 plot(hist)
+
+tempdf <- data.frame(hist$metrics)
+#write.csv(tempdf, "Image_App/models/cnn_binary_noise08/training.csv")
+#write.csv(tempdf, "Image_App/models/cnn_binary_cweights_noise08/training.csv")
 
 #save_model_tf(model_binary, "models/cnn_binary_noise08")
 #save_model_tf(model_binary, "models/cnn_binary_cweights_noise08")
@@ -573,6 +581,10 @@ hist <- model_catent %>% fit(
 
 plot(hist)
 
+tempdf <- data.frame(hist$metrics)
+#write.csv(tempdf, "Image_App/models/cnn_catent_noiserand/training.csv")
+#write.csv(tempdf, "Image_App/models/cnn_catent_cweights_noiserand/training.csv")
+
 #save_model_tf(model_catent, "models/cnn_catent_noiserand")
 #save_model_tf(model_catent, "models/cnn_catent_cweights_noiserand")
 ```
@@ -594,6 +606,10 @@ hist <- model_binary %>% fit(
 
 plot(hist)
 
+tempdf <- data.frame(hist$metrics)
+#write.csv(tempdf, "Image_App/models/cnn_binary_noiserand/training.csv")
+#write.csv(tempdf, "Image_App/models/cnn_binary_cweights_noiserand/training.csv")
+
 #save_model_tf(model_binary, "models/cnn_binary_noiserand")
 #save_model_tf(model_binary, "models/cnn_binary_cweights_noiserand")
 ```
@@ -613,6 +629,10 @@ hist <- model_rmsprop %>% fit(
 )
 
 plot(hist)
+
+tempdf <- data.frame(hist$metrics)
+#write.csv(tempdf, "Image_App/models/cnn_rmsprop_cweights_noiserand/training.csv")
+#write.csv(tempdf, "Image_App/models/cnn_rmsprop_noiserand/training.csv")
 
 #save_model_tf(model_rmsprop, "models/cnn_rmsprop_cweights_noiserand")
 #save_model_tf(model_rmsprop, "models/cnn_rmsprop_noiserand")
@@ -652,7 +672,7 @@ hist <- model_catent %>% fit(
   y = res_y_train,
   batch_size = batch_size,
   steps_per_epoch = (dim(res_x_train)[1]*0.8) %/% batch_size,
-  #class_weight = class_weight,
+  class_weight = class_weight,
   epochs = epochs,
   validation_data = list(shuf_x_test, shuf_yy_test),
   verbose = 2
@@ -660,7 +680,11 @@ hist <- model_catent %>% fit(
 
 plot(hist)
 
-save_model_tf(model_catent, "models/cnn_catent_res16")
+tempdf <- data.frame(hist$metrics)
+#write.csv(tempdf, "Image_App/models/cnn_catent_res16/training.csv")
+#write.csv(tempdf, "Image_App/models/cnn_catent_cweights_res16/training.csv")
+
+#save_model_tf(model_catent, "models/cnn_catent_res16")
 #save_model_tf(model_catent, "models/cnn_catent_cweights_res16")
 ```
 
@@ -681,9 +705,14 @@ hist <- model_binary %>% fit(
 
 plot(hist)
 
+tempdf <- data.frame(hist$metrics)
+#write.csv(tempdf, "Image_App/models/cnn_binary_res16/training.csv")
+#write.csv(tempdf, "Image_App/models/cnn_binary_cweights_res16/training.csv")
+
 #save_model_tf(model_binary, "models/cnn_binary_res16")
 #save_model_tf(model_binary, "models/cnn_binary_cweights_res16")
 ```
+
 ```{r res_16_rmsprop}
 model_rmsprop <- model_function_rmsprop()
 
@@ -699,6 +728,10 @@ hist <- model_rmsprop %>% fit(
 )
 
 plot(hist)
+
+tempdf <- data.frame(hist$metrics)
+#write.csv(tempdf, "Image_App/models/cnn_rmsprop_res16/training.csv")
+#write.csv(tempdf, "Image_App/models/cnn_rmsprop_cweights_res16/training.csv")
 
 #save_model_tf(model_rmsprop, "models/cnn_rmsprop_cweights_res16")
 #save_model_tf(model_rmsprop, "models/cnn_rmsprop_res16")
