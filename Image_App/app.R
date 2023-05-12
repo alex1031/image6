@@ -121,15 +121,18 @@ ui <- fluidPage(
                       checkboxGroupInput("resolution_choice", "Resolution",
                                          choices = list(`16x16` = "res16",
                                                         `32x32` = "res32",
-                                                        `Random` = "res_rand"))
+                                                        `Random` = "res_rand")),
+                      checkboxGroupInput("combine_model", "Combined Model",
+                                         choices = list(`Combined` = "comb")), 
+                      actionButton("reset_vis", "Reset Input")
                       ),
                
                mainPanel(
                  # Interactive plot for binary and rmsprop models
                  column(9, align="center",
-                        plotOutput("binary_rmsprop"),
+                        plotlyOutput("binary_rmsprop"),
                         # Plot for categorical models
-                        plotOutput("categorical"))
+                        plotlyOutput("categorical"))
                )
              )
     ),
@@ -295,7 +298,7 @@ server <- function(input, output, session) {
     
   })
   
-  output$binary_rmsprop <- renderPlot({
+  output$binary_rmsprop <- renderPlotly({
     
     model_ls = c("binary", "binary_cweights", "rmsprop", "rmsprop_cweights")
     model_choice = input$model_choice[!(input$model_choice %in% c("catent", "catent_cweights"))]
@@ -471,7 +474,7 @@ server <- function(input, output, session) {
       } else {
         # Compare all models of noise level
         for (model in model_ls) {
-          for (noise in input$gaussian_level){
+          for (noise in input$resolution_choice){
             
             df <- read.csv(paste0("models/cnn_", model, "_", noise, "/training.csv"))
             if (model == "binary") {
@@ -498,6 +501,53 @@ server <- function(input, output, session) {
       }
     }
     
+    if (!is.null(input$combine_model)) {
+      
+      if (!is.null(model_choice)){
+        
+        for (model in model_choice) {
+          for (noise in input$combine_model){
+            
+            df <- read.csv(paste0("models/cnn_", model, "_", noise, "/training.csv"))
+            if (model == "binary") {
+              df$model = "Binary"
+            } else if (model == "binary_cweights") {
+              df$model = "Binary Cweights"
+            } else if (model == "rmsprop") {
+              df$model = "RMSprop"
+            } else if(model == "rmsprop_cweights") {
+              df$model = "RMSprop Cweights"
+            }
+            
+            df$noise <- "Combined"
+            model_df <- rbind(model_df, df)
+          }
+        }
+        
+      } else {
+        # Compare all models of noise level
+        for (model in model_ls) {
+          for (noise in input$combine_model){
+            
+            df <- read.csv(paste0("models/cnn_", model, "_", noise, "/training.csv"))
+            if (model == "binary") {
+              df$model = "Binary"
+            } else if (model == "binary_cweights") {
+              df$model = "Binary Cweights"
+            } else if (model == "rmsprop") {
+              df$model = "RMSprop"
+            } else if(model == "rmsprop_cweights") {
+              df$model = "RMSprop Cweights"
+            }
+            
+            df$noise <- "Combined"
+            model_df <- rbind(model_df, df)
+          }
+          
+        }
+      }
+    }
+    
     
     if (is.null(model_df)){
       plot(1, xlab = "",
@@ -509,11 +559,255 @@ server <- function(input, output, session) {
       axis(1)
     } else {
       
-      ggplot(data = model_df, aes(x = X, y = val_loss, colour = interaction(model, noise))) + geom_line()
+      ggplotly(ggplot(data = model_df, aes(x = X, y = val_loss, colour = interaction(model, noise))) + 
+        geom_line() + xlab("Epoch") + ylab("Validation Loss") + 
+        labs(title = "Model with Binary Cross-Entropy and RMSprop Optimiser", color='Model'), width = 1000)
     }
 
     
-  },width = 1000)
+  })
+  
+  output$categorical <- renderPlotly({
+    
+    model_ls = c("catent", "catent_cweights")
+    model_choice = input$model_choice[(input$model_choice %in% c("catent", "catent_cweights"))]
+    # Data Frame to keep add data of all the models
+    model_df <- NULL
+    
+    if (!is.null(model_choice)){
+      
+      for (model in model_choice) {
+        
+        df <- read.csv(paste0("models/cnn_", model, "/training.csv"))
+        if (model == "catent") {
+          df$model = "Categorical"
+        } else if (model == "catent_cweights") {
+          df$model = "Categorical Cweights"
+        } 
+        
+        df$noise <- "No Noise"
+        model_df <- rbind(model_df, df)
+      }
+    }
+    
+    if (!is.null(input$gaussian_level)) {
+      
+      if (!is.null(model_choice)){
+        
+        for (noise in input$gaussian_level) {
+          for (model in model_choice){
+            
+            df <- read.csv(paste0("models/cnn_", model, "_", noise, "/training.csv"))
+            if (model == "catent") {
+              df$model = "Categorical"
+            } else if (model == "catent_cweights") {
+              df$model = "Categorical Cweights"
+            } 
+            
+            if (noise == "noise02") {
+              df$noise <- "Low Gaussian"
+            } else if (noise == "noise08") {
+              df$noise <- "High Gaussian" 
+            } else if (noise == "noiserand") {
+              df$noise <- "Random Gaussian"
+            }
+            
+            model_df <- rbind(model_df, df)
+          }
+        }
+        
+      } else {
+        # Compare all models of noise level
+        for (noise in input$gaussian_level) {
+          for (model in model_ls){
+            
+            df <- read.csv(paste0("models/cnn_", model, "_", noise, "/training.csv"))
+            if (model == "catent") {
+              df$model = "Categorical"
+            } else if (model == "catent_cweights") {
+              df$model = "Categorical Cweights"
+            } 
+            
+            if (noise == "noise02") {
+              df$noise <- "Low Gaussian"
+            } else if (noise == "noise08") {
+              df$noise <- "High Gaussian" 
+            } else if (noise == "noiserand") {
+              df$noise <- "Random Gaussian"
+            }
+            
+            model_df <- rbind(model_df, df)
+          }
+          
+        }
+      }
+    }
+    
+    if (!is.null(input$rotation_degrees)) {
+      
+      if (!is.null(model_choice)){
+        
+        for (noise in input$rotation_degrees) {
+          for (model in model_choice){
+            
+            df <- read.csv(paste0("models/cnn_", model, "_", noise, "/training.csv"))
+            if (model == "catent") {
+              df$model = "Categorical"
+            } else if (model == "catent_cweights") {
+              df$model = "Categorical Cweights"
+            } 
+            
+            if (noise == "rotate90") {
+              df$noise <- "90"
+            } else if (noise == "rotate180") {
+              df$noise <- "180" 
+            } else if (noise == "rotaterand") {
+              df$noise <- "Random Rotation"
+            }
+            model_df <- rbind(model_df, df)
+          }
+        }
+        
+      } else {
+        # Compare all models of noise level
+        for (noise in input$rotation_degrees) {
+          for (model in model_ls){
+            
+            df <- read.csv(paste0("models/cnn_", model, "_", noise, "/training.csv"))
+            if (model == "catent") {
+              df$model = "Categorical"
+            } else if (model == "catent_cweights") {
+              df$model = "Categorical Cweights"
+            }
+            
+            if (noise == "rotate90") {
+              df$noise <- "90"
+            } else if (noise == "rotate180") {
+              df$noise <- "180" 
+            } else if (noise == "rotaterand") {
+              df$noise <- "Random Rotation"
+            }
+            model_df <- rbind(model_df, df)
+          }
+          
+        }
+      }
+    }
+    
+    if (!is.null(input$resolution_choice)) {
+      
+      if (!is.null(model_choice)){
+        
+        for (noise in input$resolution_choice) {
+          for (model in model_choice){
+            
+            df <- read.csv(paste0("models/cnn_", model, "_", noise, "/training.csv"))
+            if (model == "catent") {
+              df$model = "Categorical"
+            } else if (model == "catent_cweights") {
+              df$model = "Categorical Cweights"
+            }
+            
+            if (noise == "res16") {
+              df$noise <- "Low Resolution"
+            } else if (noise == "res32") {
+              df$noise <- "Medium Resolution" 
+            } else if (noise == "res_rand") {
+              df$noise <- "Random Resolution"
+            }
+            model_df <- rbind(model_df, df)
+          }
+        }
+        
+      } else {
+        # Compare all models of noise level
+        for (noise in input$resolution_choice) {
+          for (model in model_ls){
+            
+            df <- read.csv(paste0("models/cnn_", model, "_", noise, "/training.csv"))
+            if (model == "catent") {
+              df$model = "Categorical"
+            } else if (model == "catent_cweights") {
+              df$model = "Categorical Cweights"
+            }
+            
+            if (noise == "res16") {
+              df$noise <- "Low Resolution"
+            } else if (noise == "res32") {
+              df$noise <- "Medium Resolution" 
+            } else if (noise == "res_rand") {
+              df$noise <- "Random Resolution"
+            }
+            model_df <- rbind(model_df, df)
+          }
+          
+        }
+      }
+    }
+    
+    if (!is.null(input$combine_model)) {
+      
+      if (!is.null(model_choice)){
+        
+        for (noise in input$combine_model) {
+          for (model in model_choice){
+            
+            df <- read.csv(paste0("models/cnn_", model, "_", noise, "/training.csv"))
+            if (model == "catent") {
+              df$model = "Categorical"
+            } else if (model == "catent_cweights") {
+              df$model = "Categorical Cweights"
+            }
+            
+            df$noise <- "Combined"
+            model_df <- rbind(model_df, df)
+          }
+        }
+        
+      } else {
+        # Compare all models of noise level
+        for (noise in input$combine_model) {
+          for (model in model_ls){
+            
+            df <- read.csv(paste0("models/cnn_", model, "_", noise, "/training.csv"))
+            if (model == "catent") {
+              df$model = "Categorical"
+            } else if (model == "catent_cweights") {
+              df$model = "Categorical Cweights"
+            }
+            
+            df$noise <- "Combined"
+            model_df <- rbind(model_df, df)
+          }
+          
+        }
+      }
+    }
+    
+    if (is.null(model_df)){
+      plot(1, xlab = "",
+           ylab = "", xlim = c(0, 100), 
+           ylim = c(0, 0.5), axes = F)
+      
+      box(bty="l")
+      axis(2)
+      axis(1)
+    } else {
+      
+      ggplotly(ggplot(data = model_df, aes(x = X, y = val_loss, colour = interaction(model, noise))) + 
+        geom_line() + xlab("Epoch") + ylab("Validation Loss") + 
+        labs(title = "Validation Loss of Model with Categorical Cross-Entropy", colour = "Model"), width = 1000)
+    }
+    
+    
+  })
+  
+  observeEvent(input$reset_input, {
+    updateSliderInput(session,"gnoise", value = 0.2)          
+    updateSliderInput(session,"demo_rotation", value = 0)
+    updateRadioButtons(session,"demo_resolution", selected = 64 )
+    
+  })
   
   #output$prediction <- renderText({
   
@@ -536,10 +830,30 @@ server <- function(input, output, session) {
     display(img, method = "raster")
   })
   
-  observeEvent(input$reset_input, {
-    updateSliderInput(session,"gnoise", value = 0.2)          
-    updateSliderInput(session,"demo_rotation", value = 0)
-    updateRadioButtons(session,"demo_resolution", selected = 64 )
+  observeEvent(input$reset_vis, {
+    updateSelectizeInput(session,"model_choice",
+                         choices = list(`Binary` = "binary",
+                                        `Binary w/class weights` = "binary_cweights",
+                                        `Category` = "catent",
+                                        `Category w/class weights` = "catent_cweights",
+                                        `RMSprop` = "rmsprop",
+                                        `RMSprop w/class weights` = "rmsprop_cweights"), 
+                         selected = list(`Binary` = "binary",
+                                         `Binary w/class weights` = "binary_cweights",
+                                         `Category` = "catent",
+                                         `Category w/class weights` = "catent_cweights",
+                                         `RMSprop` = "rmsprop",
+                                         `RMSprop w/class weights` = "rmsprop_cweights")) 
+    
+    updateCheckboxGroupInput(session,"gaussian_level", choices = list(`Low (0.2)` = "noise02",
+                                                                      `High (0.8)` = "noise08",
+                                                                      `Random` = "noiserand"))
+    updateCheckboxGroupInput(session,"rotation_degrees", choices = list(`90°` = "rotate90",
+                                                                        `180°` = "rotate180",
+                                                                        `Random` = "rotaterand"))
+    updateCheckboxGroupInput(session,"resolution_choice", choices = list(`16x16` = "res16",
+                                                                         `32x32` = "res32",
+                                                                         `Random` = "res_rand"))
     
   })
   
