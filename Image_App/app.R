@@ -95,14 +95,42 @@ ui <- fluidPage(
              titlePanel("Interactive Visualisation Learning Curve"),
              
              fluidRow(
-               column(4,
+               column(3,
                       selectizeInput("model_choice", "Model",
-                                     choices = list(`Binary` = "bin",
-                                                    `Binary w/class weights` = "bincweights",
-                                                    `Category` = "cat",
-                                                    `Category w/class weights` = "catcweights",
-                                                    `RMSprop` = "rms",
-                                                    `RMSprop w/class weights` = "rmscweights"), multiple = T))
+                                     choices = list(`Binary` = "binary",
+                                                    `Binary w/class weights` = "binary_cweights",
+                                                    `Category` = "catent",
+                                                    `Category w/class weights` = "catent_cweights",
+                                                    `RMSprop` = "rmsprop",
+                                                    `RMSprop w/class weights` = "rmsprop_cweights"), 
+                                     selected = list(`Binary` = "binary",
+                                                     `Binary w/class weights` = "binary_cweights",
+                                                     `Category` = "catent",
+                                                     `Category w/class weights` = "catent_cweights",
+                                                     `RMSprop` = "rmsprop",
+                                                     `RMSprop w/class weights` = "rmsprop_cweights"),
+                                     multiple = T),
+                      checkboxGroupInput("gaussian_level", "Gaussian Noise",
+                                         choices = list(`Low (0.2)` = "noise02",
+                                                        `High (0.8)` = "noise08",
+                                                        `Random` = "noiserand")),
+                      checkboxGroupInput("rotation_degrees", "Rotation",
+                                         choices = list(`90°` = "rotate90",
+                                                        `180°` = "rotate180",
+                                                        `Random` = "rotaterand")),
+                      checkboxGroupInput("resolution_choice", "Resolution",
+                                         choices = list(`16x16` = "res16",
+                                                        `32x32` = "res32",
+                                                        `Random` = "res_rand"))
+                      ),
+               
+               mainPanel(
+                 # Interactive plot for binary and rmsprop models
+                 column(9, align="center",
+                        plotOutput("binary_rmsprop"),
+                        # Plot for categorical models
+                        plotOutput("categorical"))
+               )
              )
     ),
     
@@ -266,6 +294,226 @@ server <- function(input, output, session) {
     )
     
   })
+  
+  output$binary_rmsprop <- renderPlot({
+    
+    model_ls = c("binary", "binary_cweights", "rmsprop", "rmsprop_cweights")
+    model_choice = input$model_choice[!(input$model_choice %in% c("catent", "catent_cweights"))]
+    # Data Frame to keep add data of all the models
+    model_df <- NULL
+    
+    if (!is.null(model_choice)){
+      
+      for (model in model_choice) {
+        
+        df <- read.csv(paste0("models/cnn_", model, "/training.csv"))
+        if (model == "binary") {
+          df$model = "Binary"
+        } else if (model == "binary_cweights") {
+          df$model = "Binary Cweights"
+        } else if (model == "rmsprop") {
+          df$model = "RMSprop"
+        } else if(model == "rmsprop_cweights") {
+          df$model = "RMSprop Cweights"
+        }
+        df$noise <- "No Noise"
+        model_df <- rbind(model_df, df)
+      }
+    }
+    
+    if (!is.null(input$gaussian_level)) {
+      
+      if (!is.null(model_choice)){
+        
+        for (model in model_choice) {
+          for (noise in input$gaussian_level){
+            
+            df <- read.csv(paste0("models/cnn_", model, "_", noise, "/training.csv"))
+            if (model == "binary") {
+              df$model = "Binary"
+            } else if (model == "binary_cweights") {
+              df$model = "Binary Cweights"
+            } else if (model == "rmsprop") {
+              df$model = "RMSprop"
+            } else if(model == "rmsprop_cweights") {
+              df$model = "RMSprop Cweights"
+            }
+            
+            if (noise == "noise02") {
+              df$noise <- "Low Gaussian"
+            } else if (noise == "noise08") {
+              df$noise <- "High Gaussian" 
+            } else if (noise == "noiserand") {
+              df$noise <- "Random Gaussian"
+            }
+            model_df <- rbind(model_df, df)
+          }
+        }
+        
+      } else {
+        # Compare all models of noise level
+        for (model in model_ls) {
+          for (noise in input$gaussian_level){
+            
+            df <- read.csv(paste0("models/cnn_", model, "_", noise, "/training.csv"))
+            if (model == "binary") {
+              df$model = "Binary"
+            } else if (model == "binary_cweights") {
+              df$model = "Binary Cweights"
+            } else if (model == "rmsprop") {
+              df$model = "RMSprop"
+            } else if(model == "rmsprop_cweights") {
+              df$model = "RMSprop Cweights"
+            }
+            
+            if (noise == "noise02") {
+              df$noise <- "Low Gaussian"
+            } else if (noise == "noise08") {
+              df$noise <- "High Gaussian" 
+            } else if (noise == "noiserand") {
+              df$noise <- "Random Gaussian"
+            }
+            model_df <- rbind(model_df, df)
+          }
+          
+        }
+      }
+    }
+    
+    if (!is.null(input$rotation_degrees)) {
+      
+      if (!is.null(model_choice)){
+        
+        for (model in model_choice) {
+          for (noise in input$rotation_degrees){
+            
+            df <- read.csv(paste0("models/cnn_", model, "_", noise, "/training.csv"))
+            if (model == "binary") {
+              df$model = "Binary"
+            } else if (model == "binary_cweights") {
+              df$model = "Binary Cweights"
+            } else if (model == "rmsprop") {
+              df$model = "RMSprop"
+            } else if(model == "rmsprop_cweights") {
+              df$model = "RMSprop Cweights"
+            }
+            
+            if (noise == "rotate90") {
+              df$noise <- "90"
+            } else if (noise == "rotate180") {
+              df$noise <- "180" 
+            } else if (noise == "rotaterand") {
+              df$noise <- "Random Rotation"
+            }
+            model_df <- rbind(model_df, df)
+          }
+        }
+        
+      } else {
+        # Compare all models of noise level
+        for (model in model_ls) {
+          for (noise in input$rotation_degrees){
+           
+            df <- read.csv(paste0("models/cnn_", model, "_", noise, "/training.csv"))
+            if (model == "binary") {
+              df$model = "Binary"
+            } else if (model == "binary_cweights") {
+              df$model = "Binary Cweights"
+            } else if (model == "rmsprop") {
+              df$model = "RMSprop"
+            } else if(model == "rmsprop_cweights") {
+              df$model = "RMSprop Cweights"
+            }
+            
+            if (noise == "rotate90") {
+              df$noise <- "90"
+            } else if (noise == "rotate180") {
+              df$noise <- "180" 
+            } else if (noise == "rotaterand") {
+              df$noise <- "Random Rotation"
+            }
+            model_df <- rbind(model_df, df)
+          }
+          
+        }
+      }
+    }
+    
+    if (!is.null(input$resolution_choice)) {
+      
+      if (!is.null(model_choice)){
+        
+        for (model in model_choice) {
+          for (noise in input$resolution_choice){
+            
+            df <- read.csv(paste0("models/cnn_", model, "_", noise, "/training.csv"))
+            if (model == "binary") {
+              df$model = "Binary"
+            } else if (model == "binary_cweights") {
+              df$model = "Binary Cweights"
+            } else if (model == "rmsprop") {
+              df$model = "RMSprop"
+            } else if(model == "rmsprop_cweights") {
+              df$model = "RMSprop Cweights"
+            }
+            
+            if (noise == "res16") {
+              df$noise <- "Low Resolution"
+            } else if (noise == "res32") {
+              df$noise <- "Medium Resolution" 
+            } else if (noise == "res_rand") {
+              df$noise <- "Random Resolution"
+            }
+            model_df <- rbind(model_df, df)
+          }
+        }
+        
+      } else {
+        # Compare all models of noise level
+        for (model in model_ls) {
+          for (noise in input$gaussian_level){
+            
+            df <- read.csv(paste0("models/cnn_", model, "_", noise, "/training.csv"))
+            if (model == "binary") {
+              df$model = "Binary"
+            } else if (model == "binary_cweights") {
+              df$model = "Binary Cweights"
+            } else if (model == "rmsprop") {
+              df$model = "RMSprop"
+            } else if(model == "rmsprop_cweights") {
+              df$model = "RMSprop Cweights"
+            }
+            
+            if (noise == "res16") {
+              df$noise <- "Low Resolution"
+            } else if (noise == "res32") {
+              df$noise <- "Medium Resolution" 
+            } else if (noise == "res_rand") {
+              df$noise <- "Random Resolution"
+            }
+            model_df <- rbind(model_df, df)
+          }
+          
+        }
+      }
+    }
+    
+    
+    if (is.null(model_df)){
+      plot(1, xlab = "",
+           ylab = "", xlim = c(0, 100), 
+           ylim = c(0, 0.5), axes = F)
+      
+      box(bty="l")
+      axis(2)
+      axis(1)
+    } else {
+      
+      ggplot(data = model_df, aes(x = X, y = val_loss, colour = interaction(model, noise))) + geom_line()
+    }
+
+    
+  },width = 1000)
   
   #output$prediction <- renderText({
   
