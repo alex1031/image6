@@ -84,19 +84,29 @@ class: segue-red
 
 ]]
 
+---
+## Figure 1: Workflow Diagram
+
+```{r echo=FALSE, out.width="600px", out.height="600px", fig.align='center'}
+knitr::include_graphics("images/workflow_1.png")
+
+```
+
+- need to change figure 4 to figure 5
+- add a figure 4 as preprocessing with data augmentations
 
 ---
+## Figure 2: Data Preprocessing without augmentations
 
 
-## WORKFLOW DIAGRAM 1
-
-
+---
+## Figure 3: CNN Model
 
 
 ---
 class: segue-red
 
-# Data Augmention
+# Data Augmentation
 
 
 .left[.footnote[
@@ -112,20 +122,18 @@ class: segue-red
 
 ## Choice of Data Augmentations
 
+Data augmentation is a technique used to help reduce over-fitting (Shorten & Khoshgoftaar, 2019). 
+
+Three data augmentation factors:
+
 - noise
 
 - rotation
 
 - resolution
 
-
 ---
-
-## WORKFLOW DIAGRAM 2
-
-- provide a workflow diagram 
-
-
+## Figure 4: Preprocessing with data augmentations
 
 
 ---
@@ -136,29 +144,16 @@ Shiny App link
 
 
 ---
-class: segue-red
-
-# Conclusion
-
-
-.left[.footnote[
-
-```
-
-```
-
-]]
-
----
-
 ## INTERPRETATION
 
+Figure 5: Analyse Effects of Noise on CNN Models (maybe we do not need a figure)
+
 
 
 ---
 class: segue-red
 
-# Future Analysis
+# Discussion
 
 
 .left[.footnote[
@@ -168,6 +163,10 @@ class: segue-red
 ```
 
 ]]
+
+---
+## CONCLUSION
+
 
 ---
 
