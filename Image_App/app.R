@@ -150,7 +150,7 @@ ui <- fluidPage(
                       radioButtons("demo_resolution", label = "Resolution",
                                    choices = list ("Default (64x64)" = 64, "16x16" = 16, "32x32" = 32),
                                    selected = 64),
-                      actionButton("reset_input", "Reset inputs")
+                      actionButton("reset_input", "Reset Input")
                ),
                mainPanel(
                  # Output: Histogram ----
@@ -247,7 +247,7 @@ server <- function(input, output, session) {
     ggplotly(ggplot(data = gaussian, aes(x = factor(noise_level, level = level_order), y = val_loss, fill = model)) +
                geom_bar(stat = "identity", position="dodge") +
                xlab("Gaussian Noise Level") + ylab("Validation Loss") +
-               ggtitle("Comparison of Validation Loss on Model with Binary Cross-Entropy Loss and RMSprop Optimiser"))
+               ggtitle("Comparison of Validation Loss on Binary and RMSprop Model"))
     
   })
   
@@ -260,7 +260,7 @@ server <- function(input, output, session) {
     ggplotly(ggplot(data = gaussian_catent, aes(x = factor(noise_level, level = level_order), y = val_loss, fill = model)) + 
                geom_bar(stat = "identity", position="dodge") +
                xlab("Gaussian Noise Level") + ylab("Validation Loss") +
-               ggtitle("Comparison of Validation Loss on Model with Categorical Cross-Entropy Loss"))
+               ggtitle("Comparison of Validation Loss on Categorical Model"))
     
   })
   
