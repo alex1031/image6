@@ -87,18 +87,20 @@ class: segue-red
 ---
 Figure 1: Workflow Diagram
 
-```{r echo=FALSE, out.width="600px", out.height="600px", fig.align='center'}
-knitr::include_graphics("images/workflow_2.png")
+```{r echo=FALSE, out.width="500px", out.height="500px", fig.align='center'}
+knitr::include_graphics("images/Workflow.png")
 
 ```
 
 
 ---
-Figure 2: Data Pre-processing without augmentations
+Figure 2: CNN Model (Shanqing; Pednekar & Slater, 2019)
 
+```{r echo=FALSE, fig.align='center'}
+knitr::include_graphics("images/CNN_diagram.png")
 
----
-Figure 3: CNN Model
+```
+
 
 
 ---
@@ -130,9 +132,15 @@ Three data augmentation factors:
 
 - resolution
 
----
-Figure 4: Pre-processing with augmentations
 
+---
+Figure 3: Result Collection Process
+
+
+```{r echo=FALSE, out.width="500px", out.height="500px", fig.align='center'}
+knitr::include_graphics("images/Results_Process.png")
+
+```
 
 ---
 
@@ -143,8 +151,6 @@ Shiny App link
 
 ---
 ## INTERPRETATION
-
-Figure 5: Analyse Effects of Noise on CNN Models
 
 
 
