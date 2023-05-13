@@ -15,7 +15,7 @@ library(EBImage)
 library(plotly)
 
 # Load the model and data
-model <- load_model_tf("models/cnn")
+#model <- load_model_tf("models/cnn")
 val_loss <- read.csv("val_loss.csv")
 
 ui <- fluidPage(

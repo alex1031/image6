@@ -1,67 +1,67 @@
 ﻿model,noise_type,noise_level,val_loss
 Binary,gaussian,low,0.2238
-Binary w/class weights,gaussian,low,0.2188
-Category,gaussian,low,6.7022
-Category w/class weights,gaussian,low,6.1445
-RMSprop,gaussian,low,0.2373
-RMSprop w/class weights,gaussian,low,0.1901
+Binary w/class weights,gaussian,low,0.293
+Category,gaussian,low,6.2574
+Category w/class weights,gaussian,low,5.8756
+RMSprop,gaussian,low,0.2202
+RMSprop w/class weights,gaussian,low,0.1821
 Binary,gaussian,high,0.2607
-Binary w/class weights,gaussian,high,0.2094
+Binary w/class weights,gaussian,high,0.221
 Category,gaussian,high,6.6276
 Category w/class weights,gaussian,high,6.3434
-RMSprop,gaussian,high,0.2042
-RMSprop w/class weights,gaussian,high,0.177
+RMSprop,gaussian,high,0.2156
+RMSprop w/class weights,gaussian,high,0.1751
 Binary,gaussian,random,0.3078
 Binary w/class weights,gaussian,random,0.2086
 Category,gaussian,random,6.8412
 Category w/class weights,gaussian,random,6.158
 RMSprop,gaussian,random,0.2149
 RMSprop w/class weights,gaussian,random,0.18
-Binary,rotation,low,0.2184
-Binary w/class weights,rotation,low,0.1739
+Binary,rotation,low,0.2355
+Binary w/class weights,rotation,low,0.1878
 Category,rotation,low,5.8
-Category w/class weights,rotation,low,5.2886
-RMSprop,rotation,low,0.1683
-RMSprop w/class weights,rotation,low,0.1585
-Binary,rotation,high,0.2204
-Binary w/class weights,rotation,high,0.1773
-Category,rotation,high,5.0794
-Category w/class weights,rotation,high,4.6887
-RMSprop,rotation,high,0.1732
-RMSprop w/class weights,rotation,high,0.1721
-Binary,rotation,random,0.2176
-Binary w/class weights,rotation,random,0.1672
-Category,rotation,random,4.9836
-Category w/class weights,rotation,random,4.3703
-RMSprop,rotation,random,0.1698
-RMSprop w/class weights,rotation,random,0.1591
-Binary,resolution,low,0.2334
-Binary w/class weights,resolution,low,0.1944
-Category,resolution,low,5.5658
-Category w/class weights,resolution,low,4.8395
-RMSprop,resolution,low,0.1842
-RMSprop w/class weights,resolution,low,0.1624
-Binary,resolution,medium,0.1807
-Binary w/class weights,resolution,medium,0.1794
-Category,resolution,medium,5.5939
-Category w/class weights,resolution,medium,4.9142
-RMSprop,resolution,medium,0.1771
-RMSprop w/class weights,resolution,medium,0.1646
+Category w/class weights,rotation,low,5.2267
+RMSprop,rotation,low,0.1823
+RMSprop w/class weights,rotation,low,0.1628
+Binary,rotation,high,0.246
+Binary w/class weights,rotation,high,0.1836
+Category,rotation,high,5.6347
+Category w/class weights,rotation,high,4.9477
+RMSprop,rotation,high,0.184
+RMSprop w/class weights,rotation,high,0.1585
+Binary,rotation,random,0.2611
+Binary w/class weights,rotation,random,0.1818
+Category,rotation,random,6.11
+Category w/class weights,rotation,random,5.4714
+RMSprop,rotation,random,0.1824
+RMSprop w/class weights,rotation,random,0.1629
+Binary,resolution,low,0.2101
+Binary w/class weights,resolution,low,0.177
+Category,resolution,low,5.6171
+Category w/class weights,resolution,low,4.7255
+RMSprop,resolution,low,0.1782
+RMSprop w/class weights,resolution,low,0.1563
+Binary,resolution,medium,0.2145
+Binary w/class weights,resolution,medium,0.1714
+Category,resolution,medium,5.179
+Category w/class weights,resolution,medium,4.4704
+RMSprop,resolution,medium,0.1652
+RMSprop w/class weights,resolution,medium,0.1592
 Binary,resolution,random,0.2607
 Binary w/class weights,resolution,random,0.184
 Category,resolution,random,5.9652
 Category w/class weights,resolution,random,5.1211
 RMSprop,resolution,random,0.1813
 RMSprop w/class weights,resolution,random,0.1602
-Binary,combined,none,0.2004
-Binary w/class weights,combined,none,0.1718
-Category,combined,none,4.9096
-Category w/class weights,combined,none,4.1261
-RMSprop,combined,none,0.1793
-RMSprop w/class weights,combined,none,0.1558
+Binary,combined,none,0.2084
+Binary w/class weights,combined,none,0.1769
+Category,combined,none,4.8067
+Category w/class weights,combined,none,4.6177
+RMSprop,combined,none,0.1891
+RMSprop w/class weights,combined,none,0.1601
 Binary,none,none,0.2298
-Binary w/class weights,none,none,0.185
-Category,none,none,6.1524
-Category w/class weights,none,none,5.5162
-RMSprop,none,none,0.1718
+Binary w/class weights,none,none,0.1783
+Category,none,none,5.9506
+Category w/class weights,none,none,5.4758
+RMSprop,none,none,0.1711
 RMSprop w/class weights,none,none,0.1599
