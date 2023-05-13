@@ -871,6 +871,10 @@ hist <- model_catent %>% fit(
 
 plot(hist)
 
+tempdf <- data.frame(hist$metrics)
+#write.csv(tempdf, "Image_App/models/cnn_catent_res_rand/training.csv")
+write.csv(tempdf, "Image_App/models/cnn_catent_cweights_res_rand/training.csv")
+
 #save_model_tf(model_catent, "models/cnn_catent_res_rand")
 #save_model_tf(model_catent, "models/cnn_catent_cweights_res_rand")
 ```
@@ -892,6 +896,10 @@ hist <- model_binary %>% fit(
 
 plot(hist)
 
+tempdf <- data.frame(hist$metrics)
+#write.csv(tempdf, "Image_App/models/cnn_binary_res_rand/training.csv")
+write.csv(tempdf, "Image_App/models/cnn_binary_cweights_res_rand/training.csv")
+
 #save_model_tf(model_binary, "models/cnn_binary_res_rand")
 #save_model_tf(model_binary, "models/cnn_binary_cweights_res_rand")
 ```
@@ -911,6 +919,10 @@ hist <- model_rmsprop %>% fit(
 )
 
 plot(hist)
+
+tempdf <- data.frame(hist$metrics)
+#write.csv(tempdf, "Image_App/models/cnn_rmsprop_res_rand/training.csv")
+write.csv(tempdf, "Image_App/models/cnn_rmsprop_cweights_res_rand/training.csv")
 
 #save_model_tf(model_rmsprop, "models/cnn_rmsprop_cweights_res_rand")
 #save_model_tf(model_rmsprop, "models/cnn_rmsprop_res_rand")
