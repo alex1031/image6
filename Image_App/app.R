@@ -20,10 +20,8 @@ val_loss <- read.csv("val_loss.csv")
 
 ui <- fluidPage(
   
-  titlePanel("Robustness on Cell Image Classification"),
-  
   navbarPage(
-    "Effects of Robustness",
+    "CCR",
     
     tags$head(
       tags$style(HTML("
@@ -31,6 +29,11 @@ ui <- fluidPage(
       .shiny-output {
         width: 1000px;
         height: 800px;
+      }
+      
+      .navbar-default .navbar-nav > .active > a, .navbar-default .navbar-nav > .active > a:hover, .navbar-default .navbar-nav > .active > a:focus{
+        background-color: #E2DED0;
+        font-weight: bolder;
       }
     "))
     ),
@@ -49,9 +52,11 @@ ui <- fluidPage(
                       column(width = 4, uiOutput(outputId = "original1")),
                       column(width = 4, uiOutput(outputId = "noise_low")),
                       column(width = 4, uiOutput(outputId = "noise_high")),
-                      textOutput(outputId = "noise_description")
-                      
+                  
              ),
+             
+             fluidRow(style = "padding: 25px; font-size: 17px; margin: auto; max-width: 1000px; max-height: 500px; border: 4px outset; background: ghostwhite",
+                      htmlOutput(outputId = "noise_description")),
              
              titlePanel("Validation Loss Comparison"),
              
@@ -59,8 +64,7 @@ ui <- fluidPage(
                style = "border: 4px groove;",
                align = "center",
                column(width = 6, plotlyOutput(outputId = "noise_plot")),
-               column(width = 6, plotlyOutput(outputId = "noise_catent")),
-               textOutput(outputId = "noise_analysis")
+               column(width = 6, plotlyOutput(outputId = "noise_catent"))
              )
     ),
     
@@ -71,31 +75,52 @@ ui <- fluidPage(
                       
                       column(width = 4, uiOutput(outputId = "original2")),
                       column(width = 4, uiOutput(outputId = "resolution_low")),
-                      column(width = 4, uiOutput(outputId = "resolution_medium"))
-                      
-             ),
+                      column(width = 4, uiOutput(outputId = "resolution_medium")),
+                      ),
              
-             textOutput(outputId = "resolution_description")
+             fluidRow(style = "padding: 25px; font-size: 17px; margin: auto; max-width: 1000px; max-height: 500px; border: 4px outset; background: ghostwhite",
+                      htmlOutput(outputId = "resolution_description")),
+             
+             titlePanel("Validation Loss Comparison"),
+             
+             fluidRow(
+               style = "border: 4px groove;",
+               align = "center",
+               column(width = 6, plotlyOutput(outputId = "res_plot")),
+               column(width = 6, plotlyOutput(outputId = "res_catent"))
+             )
+             
     ),
     
     tabPanel("Image Rotation",
-             sidebarLayout(
-               sidebarPanel(
-                 sliderInput("rotation", "Rotation:", min = 0, max = 360, value = 60)
-               ),
-               mainPanel(
-                 # Output: Histogram ----
-                 #textOutput(outputId = "prediction"),
-                 #plotOutput(outputId = "image")
-               )
+             titlePanel("Effect of Different Image Rotation"),
+             
+             fluidRow(align = "center",
+                      
+                      column(width = 4, uiOutput(outputId = "original3")),
+                      column(width = 4, uiOutput(outputId = "rotate_90")),
+                      column(width = 4, uiOutput(outputId = "rotate_180")),
+                      
+             ),
+             
+             fluidRow(style = "padding: 25px; font-size: 17px; margin: auto; max-width: 1000px; max-height: 500px; border: 4px outset; background: ghostwhite",
+                      htmlOutput(outputId = "rotate_description")),
+             
+             titlePanel("Validation Loss Comparison"),
+             
+             fluidRow(
+               style = "border: 4px groove;",
+               align = "center",
+               column(width = 6, plotlyOutput(outputId = "rotate_plot")),
+               column(width = 6, plotlyOutput(outputId = "rotate_catent"))
              )
     ),
     
     tabPanel("Visualisation",
-             titlePanel("Interactive Visualisation Learning Curve"),
+             titlePanel("Interactive Learning Curve Visualisation "),
              
              fluidRow(
-               column(3,
+               column(3, style = "border: 4px groove #922C40;padding:25px; background-color: #ECD5BB;",
                       selectizeInput("model_choice", "Model",
                                      choices = list(`Binary` = "binary",
                                                     `Binary w/class weights` = "binary_cweights",
@@ -110,18 +135,22 @@ ui <- fluidPage(
                                                      `RMSprop` = "rmsprop",
                                                      `RMSprop w/class weights` = "rmsprop_cweights"),
                                      multiple = T),
+                      
                       checkboxGroupInput("gaussian_level", "Gaussian Noise",
                                          choices = list(`Low (0.2)` = "noise02",
                                                         `High (0.8)` = "noise08",
                                                         `Random` = "noiserand")),
-                      checkboxGroupInput("rotation_degrees", "Rotation",
-                                         choices = list(`90°` = "rotate90",
-                                                        `180°` = "rotate180",
-                                                        `Random` = "rotaterand")),
+                      
                       checkboxGroupInput("resolution_choice", "Resolution",
                                          choices = list(`16x16` = "res16",
                                                         `32x32` = "res32",
                                                         `Random` = "res_rand")),
+                      
+                      checkboxGroupInput("rotation_degrees", "Rotation",
+                                         choices = list(`90°` = "rotate90",
+                                                        `180°` = "rotate180",
+                                                        `Random` = "rotaterand")),
+                      
                       checkboxGroupInput("combine_model", "Combined Model",
                                          choices = list(`Combined` = "comb")), 
                       actionButton("reset_vis", "Reset Input")
@@ -141,7 +170,7 @@ ui <- fluidPage(
              titlePanel("Demo"),
              
              fluidRow(
-               column(4,
+               column(3, style = "border: 4px groove #922C40;padding:25px; background-color: #ECD5BB;",
                       fileInput("file", h3("File input")),
                       sliderInput("gnoise", label = "Gaussian Noise",
                                   min = 0, max = 1, value = 0.2),
@@ -235,7 +264,12 @@ server <- function(input, output, session) {
   
   output$noise_description <- renderText({
     
-    print("Insert Description.")
+    HTML("Adding noise expands the size of the training dataset. Each time a training sample is exposed to the model, 
+    random noise is added to the input variables making them different every time it is exposed to the model 
+    (<a href='https://www.academia.edu/38223830/Adaptive_Computation_and_Machine_Learning_series_Deep_learning_The_MIT_Press_2016_pdf'>Maulana, n.d.</a>). 
+    In addition, from scientific research, we found that the addition of noise to the input 
+    data of a neural network during training can lead to significant improvements in generalisation performance 
+    (<a href='https://doi.org/10.1162/neco.1995.7.1.108'>Bishop, 1995</a>).")
     
   })
   
@@ -264,11 +298,18 @@ server <- function(input, output, session) {
     
   })
   
-  output$noise_analysis <- renderText({
-    print("Insert Analysis")
+  output$resolution_description <- renderText({
+    "Examining image resolution is crucial in deep learning applications, particularly in tasks involving radiology 
+     (like chest radiographic image analysis).  While large image resolutions provide more information for 
+     classification, studies have shown that better model performance can sometimes be achieved with lower image 
+     resolutions (<a href='https://doi.org/10.1148/ryai.2019190015'>Sabottke & Spieler, 2020</a>). 
+     This is because reducing the number of inputs or features can help 
+     minimise the number of parameters to be optimsed, thereby decreasing the risk of the model over-fitting. 
+     However, excessively reducing image resolution can lead to the elimination of important information useful 
+     for classification. Hence, we decided to look into how low, high, and random resolutions have an effect on 
+     the classification model."
+
   })
-  
-  output$resolution_description <- renderText({print("Insert Description.")})
   
   output$resolution_low <- renderUI({
     
@@ -295,6 +336,111 @@ server <- function(input, output, session) {
       ),
       tags$figcaption("32x32 Resolution")
     )
+    
+  })
+  
+  output$res_plot <- renderPlotly({
+    level_order <- c("none", "low", "medium", "random")
+    
+    resolution <- val_loss |> filter((noise_type == "resolution" | noise_type == "none") & !grepl("Category", model))
+    
+    ggplotly(ggplot(data = resolution, aes(x = factor(noise_level, level = level_order), y = val_loss, fill = model)) +
+               geom_bar(stat = "identity", position="dodge") +
+               xlab("Resolution") + ylab("Validation Loss") +
+               ggtitle("Comparison of Validation Loss on Binary and RMSprop Model"))
+    
+  }) 
+  
+  output$res_catent <- renderPlotly({
+    
+    level_order <- c("none", "low", "medium", "random")
+    
+    resolution_catent <- val_loss |> filter((noise_type == "resolution" | noise_type == "none") & grepl("Category", model))
+    
+    ggplotly(ggplot(data = resolution_catent, aes(x = factor(noise_level, level = level_order), y = val_loss, fill = model)) + 
+               geom_bar(stat = "identity", position="dodge") +
+               xlab("Resolution") + ylab("Validation Loss") +
+               ggtitle("Comparison of Validation Loss on Categorical Model"))
+    
+  })
+  
+  output$original3 <- renderUI({
+    
+    tags$figure (
+      tags$img(
+        src = "original.png",
+        width = 300,
+        height = 300,
+        alt = "Original Image with no rotation"
+      ),
+      tags$figcaption("Original Image")
+    )
+    
+  })
+  
+  output$rotate_90 <- renderUI({
+    
+    tags$figure (
+      tags$img(
+        src = "rotate90_example.png",
+        width = 300,
+        height = 300,
+        alt = "Image with 90 degree rotation"
+      ),
+      tags$figcaption("90 Degree Rotation")
+    )
+    
+  })
+  
+  output$rotate_180 <- renderUI({
+    
+    tags$figure (
+      tags$img(
+        src = "rotate180_example.png",
+        width = 300,
+        height = 300,
+        alt = "Image with 180 degree rotation"
+      ),
+      tags$figcaption("180 Degree Rotation")
+    )
+    
+  })
+  
+  output$rotate_description <- renderText({
+    
+    "Image rotation is a critical data augmentation strategy in improving the performance of machine learning models.
+    Traditional methods like image rotations, are fast and straightforward to implement and have proven to be 
+    effective in increasing the training dataset (<a href = 'https://doi.org/10.1109/IIPHDW.2018.8388338'>Mikołajczyk & Grochowski, 2018</a>). 
+    By rotating an image at 
+    various angles, the model is exposed to more diverse observations of the cells, enhancing its ability to 
+    generalise across different perspectives (<a href='https://www.amygb.ai/blog/what-is-data-augmentation-in-image-processing'>What Is Data Augmentation in Image Processing?, n.d.</a>). 
+    Data augmentation can quickly expand the existing dataset by adding more relevant observations, which is highly 
+    beneficial as deep learning models require larger datasets for training."
+    
+  })
+  
+  output$rotate_plot <- renderPlotly({
+    level_order <- c("none", "low", "high", "random")
+    
+    resolution <- val_loss |> filter((noise_type == "rotation" | noise_type == "none") & !grepl("Category", model))
+    
+    ggplotly(ggplot(data = resolution, aes(x = factor(noise_level, level = level_order), y = val_loss, fill = model)) +
+               geom_bar(stat = "identity", position="dodge") +
+               xlab("Rotation") + ylab("Validation Loss") +
+               ggtitle("Comparison of Validation Loss on Binary and RMSprop Model"))
+    
+  }) 
+  
+  output$rotate_catent <- renderPlotly({
+    
+    level_order <- c("none", "low", "high", "random")
+    
+    resolution_catent <- val_loss |> filter((noise_type == "rotation" | noise_type == "none") & grepl("Category", model))
+    
+    ggplotly(ggplot(data = resolution_catent, aes(x = factor(noise_level, level = level_order), y = val_loss, fill = model)) + 
+               geom_bar(stat = "identity", position="dodge") +
+               xlab("Rotation") + ylab("Validation Loss") +
+               ggtitle("Comparison of Validation Loss on Categorical Model"))
     
   })
   
