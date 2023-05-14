@@ -15,8 +15,39 @@ library(EBImage)
 library(plotly)
 
 # Load the model and data
-#model <- load_model_tf("models/cnn")
 val_loss <- read.csv("val_loss.csv")
+
+input_shape = c(64, 64, 1)
+lr = 0.001
+model_function_rmsprop <- function(learning_rate = lr) {
+  
+  k_clear_session()
+  
+  model <- keras_model_sequential() %>%
+    layer_conv_2d(filters = 32, kernel_size = c(3,3), activation = 'relu', input_shape = input_shape) %>% 
+    layer_max_pooling_2d(pool_size = c(2, 2)) %>% 
+    layer_conv_2d(filters = 64, kernel_size = c(3,3), activation = 'relu') %>% 
+    layer_max_pooling_2d(pool_size = c(2, 2)) %>% 
+    layer_dropout(rate = 0.25) %>% 
+    layer_flatten() %>% 
+    layer_dense(units = 128, activation = 'relu') %>% 
+    layer_dropout(rate = 0.5) %>% 
+    layer_dense(units = 64) %>% 
+    layer_dropout(rate = 0.5) %>% 
+    layer_dense(units = 28, activation = 'softmax')
+  
+  model %>% compile(
+    loss = "binary_crossentropy",
+    optimizer = optimizer_rmsprop(learning_rate = learning_rate),
+    metrics = "accuracy"
+  )
+  
+  return(model)
+  
+}
+
+model <- model_function_rmsprop()
+load_model_weights_tf(model, "models/cnn_rmsprop_cweights_comb")
 
 ui <- fluidPage(
   
@@ -184,7 +215,9 @@ ui <- fluidPage(
                mainPanel(
                  # Output: Histogram ----
                  plotOutput(outputId = "image"),
-                 textOutput(outputId = "prediction"))
+                 titlePanel("Output"),
+                 htmlOutput(style = "padding: 25px; font-size: 17px; margin: auto; border: 4px outset; background: #CBE1DF",
+                            outputId = "prediction"))
                
              )
     )
@@ -194,15 +227,9 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   
-  add_gaussian_noise <- function(image, mean = 0, sd = 0.1) {
-    set.seed(6)
-    img <- image[1,,,] + rnorm(1, mean, sd)
-    return(img)
-  }
-  
-  image <- reactive({
+  cell_image <- reactive({
     req(input$file)
-    png::readPNG(input$file$datapath)
+    EBImage::readImage(input$file$datapath)
   })
   
   
@@ -955,22 +982,29 @@ server <- function(input, output, session) {
     
   })
   
-  #output$prediction <- renderText({
+  add_gaussian_noise_display <- function(image, mean = 0, sd = 0.1) {
+    set.seed(6)
+    img <- image + rnorm(1, mean, sd)
+    return(img)
+  }
   
-  #img <- resize(image(), 64, 64)
-  #img <- array_reshape(img, dim = c(1, 64, 64, 1))
-  #img <- img - mean(img)
+  output$prediction <- renderText({
+    
+    x <- array(dim = c(1, 64, 64, 1))
+    x[1,,,1] <- resize(rotate(cell_image(), as.integer(input$demo_rotation)), as.integer(input$demo_resolution), as.integer(input$demo_resolution))
+    x <- x - mean(x)
+    x <- add_gaussian_noise_display(x, mean=as.integer(input$gnoise))
+    x <- array_reshape(x, dim = c(1, 64, 64, 1))
+    pred <- predict(model, x)
+    pred_class = which.max(pred)
   
-  #pred <- predict(model, img)
-  #pred_class = which.max(pred)
-  
-  #paste0("The predicted class number is ", summary(model))
-  #})
+  paste0("The predicted cluster is <b>", pred_class, "</b>.")
+  })
   
   output$image <- renderPlot({
-    img <- resize(image(), 64, 64)
-    img <- array_reshape(img, dim = c(1, 64, 64, 1))
-    img <- add_gaussian_noise(img, mean = input$gnoise)
+  
+    #img <- resize(image(), 64, 64)
+    img <- add_gaussian_noise_display(cell_image(), mean = input$gnoise)
     img <- rotate(img, input$demo_rotation)
     img <- resize(img, as.integer(input$demo_resolution), as.integer(input$demo_resolution))
     display(img, method = "raster")

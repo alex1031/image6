@@ -1403,6 +1403,18 @@ tempdf <- data.frame(hist$metrics)
 
 #save_model_tf(model_rmsprop, "models/cnn_rmsprop_cweights_comb")
 #save_model_tf(model_rmsprop, "models/cnn_rmsprop_comb")
+
+save_model_weights_tf(model_rmsprop, "Image_App/models/cnn_rmsprop_cweights_comb/weights")
 ```
+
+```{r}
+library(tensorflow)
+temp <- model_function_rmsprop()
+
+load_model_weights_tf(temp, "Image_App/models/cnn_rmsprop_cweights_comb/weights")
+
+attributes(temp)
+```
+
 
 
