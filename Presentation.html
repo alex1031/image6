@@ -43,12 +43,6 @@ class: center, middle, inverse, title-slide
 
 ## PROJECT CONTEXT 
 
-**Motivation:** Developing a robust computer vision tool, since cell images can be affected by various factors leading to errors in image analysis &amp; classification (Rączkowski et al., 2019). 
-
-
-**Robustness:** refers to the ability of an image analysis model to maintain reliable results even in the presence of variations in the input images (Drenkow et al., n.d.). 
-
-
 **Project Questions:**
 - Q1: Investigating how the model's performance &amp; robustness vary with different types &amp; levels of noise levels, image resolution, &amp; image artifacts. 
 
@@ -68,7 +62,7 @@ Image: Frozen Mouse Brain (Mouse Brain Dataset Explorer, n.d.)
 ---
 Figure 1: Workflow Diagram
 
-&lt;img src="images/Workflow.png" width="550px" height="550px" style="display: block; margin: auto;" /&gt;
+&lt;img src="images/Workflow.png" width="600px" height="550px" style="display: block; margin: auto;" /&gt;
 
 
 
@@ -112,32 +106,39 @@ class: segue-red
 
 
 ---
-
-## Choice of Data Augmentations
-
-Data augmentation is a technique used to help reduce over-fitting (Shorten &amp; Khoshgoftaar, 2019). 
-
-- **Noise** in data augmentation enlarges the training dataset by introducing random variations to input variables (Maulana, n.d.). This process improves model generalization, loss function and overfitting (Bishop, 1995; Maulana, n.d.) (Shanqing; Pednekar &amp; Slater, 2019).
-
-
-- **Image Resolution** is vital in deep learning applications like radiology. High resolution offers more information, but lower resolutions can sometimes enhance model performance by reducing overfitting risks (Sabottke &amp; Spieler, 2020).
-
-- **Image rotation**, a key data augmentation strategy, enhances machine learning models' performance by diversifying cell observations (Mikołajczyk &amp; Grochowski, 2018). 
-
-
----
 Figure 3: Evaluation Strategy 
 
 
-&lt;img src="images/Results_Process.png" width="550px" height="550px" style="display: block; margin: auto;" /&gt;
+&lt;img src="images/Results_Process.png" width="600px" height="550px" style="display: block; margin: auto;" /&gt;
 
 ---
 
-## RESULTS
+## RESULTS Q1
 
-As a team we developed this shared interactive tool to assess how the model’s performance and robustness vary with different types of data augmentation factors. 
+&lt;img src="images/Noise_Results.jpg" width="2731" style="display: block; margin: auto;" /&gt;
 
-Shiny App link...
+
+
+---
+## RESULTS Q1
+
+&lt;img src="images/Resolution_Results.jpg" width="2731" style="display: block; margin: auto;" /&gt;
+
+
+
+---
+
+## RESULTS Q1
+
+&lt;img src="images/Rotation_Results.jpg" width="2731" style="display: block; margin: auto;" /&gt;
+
+
+---
+
+## RESULTS Q2
+
+screen-record of 'visualisation' section in shiny app
+
 
 ---
 class: segue-red
@@ -156,6 +157,8 @@ class: segue-red
 ---
 ## CONCLUSION
 
+- screen-record of the 'Demonstration' app part
+
 
 ---
 
@@ -167,6 +170,10 @@ class: segue-red
 
 
 ## FUTURE STUDY 
+
+- **Improving Model:** Run the model multiple times to get the average validation accuracy = more reliable 
+
+- **Medial Analysis:** Validated our model on three different medial case studies: skin melanomas diagnosis, histopathological images, &amp; breast magnetic resonance imaging (MRI) scans analysis, utilising the image classification in order to produce a diagnose (Mikołajczyk &amp; Grochowski, 2018). 
 
 
 
