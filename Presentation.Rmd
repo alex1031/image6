@@ -75,6 +75,16 @@ knitr::include_graphics("images/Data_Collection.png")
 
 
 ---
+Figure 1: Workflow Diagram
+
+```{r echo=FALSE, out.width="550px", out.height="550px", fig.align='center'}
+knitr::include_graphics("images/Workflow.png")
+
+```
+
+
+
+---
 class: segue-red
 
 # Baseline Model 
@@ -88,17 +98,7 @@ class: segue-red
 ]]
 
 ---
-Figure 1: Workflow Diagram
 
-```{r echo=FALSE, out.width="550px", out.height="550px", fig.align='center'}
-knitr::include_graphics("images/Workflow.png")
-
-```
-
-
-
-
----
 
 Figure 2: CNN Model 
 
@@ -141,7 +141,7 @@ Data augmentation is a technique used to help reduce over-fitting (Shorten & Kho
 
 
 ---
-Figure 3: Result Collection Process
+Figure 3: Evaluation Strategy 
 
 
 ```{r echo=FALSE, out.width="550px", out.height="550px", fig.align='center'}
@@ -156,12 +156,6 @@ knitr::include_graphics("images/Results_Process.png")
 As a team we developed this shared interactive tool to assess how the model’s performance and robustness vary with different types of data augmentation factors. 
 
 Shiny App link...
-
-
----
-## INTERPRETATION
-
-
 
 ---
 class: segue-red
