@@ -62,7 +62,7 @@ library(dplyr)
 
 Image: Frozen Mouse Brain (Mouse Brain Dataset Explorer, n.d.)
 
-```{r echo=FALSE, out.width="600px", out.height="450px", fig.align='center'}
+```{r echo=FALSE, out.width="615px", out.height="450px", fig.align='center'}
 knitr::include_graphics("images/Data_Collection.png")
 
 ```
@@ -129,40 +129,43 @@ knitr::include_graphics("images/Results_Process.png")
 
 ```
 
+
 ---
+class: segue-red
 
-## RESULTS Q1
+# Results
 
-```{r echo=FALSE, fig.align='center'}
+
+.left[.footnote[
+
+```
+
+```
+
+]]
+
+
+---
+```{r echo=FALSE, out.width="615px", out.height="615px", fig.align='center'}
 knitr::include_graphics("images/Noise_Results.jpg")
 
 ```
 
-
-
 ---
-## RESULTS Q1
-
-```{r echo=FALSE, fig.align='center'}
+```{r echo=FALSE,out.width="615px", out.height="615px", fig.align='center'}
 knitr::include_graphics("images/Resolution_Results.jpg")
 
 ```
 
-
-
 ---
-
-## RESULTS Q1
-
-```{r echo=FALSE, fig.align='center'}
+```{r echo=FALSE,out.width="615px", out.height="615px", fig.align='center'}
 knitr::include_graphics("images/Rotation_Results.jpg")
 
 ```
 
-
 ---
 
-## RESULTS Q2
+RESULTS Q2
 
 screen-record of 'visualisation' section in shiny app
 
