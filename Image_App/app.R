@@ -15,6 +15,7 @@ library(EBImage)
 library(plotly)
 
 # Load the model and data
+#use_condaenv("r-reticulate")
 val_loss <- read.csv("val_loss.csv")
 
 input_shape = c(64, 64, 1)
@@ -71,38 +72,14 @@ ui <- fluidPage(
     
     
     tabPanel("Introduction",
-             mainPanel(
-               align = "center",
-               h2("Welcome to the Cell Classification Robustness (CCR) Shiny Application"),
-               br(),
-               p("This interactive tool is designed to help you understand how different factors, such as Gaussian noise and image resolution, can impact the performance of a CNN model."),
-               hr()),
-             mainPanel(
-               align = "center",
-               h3("Here's how to navigate and use the application:"),
-               br(),
-               h4("Introduction Tab: "),
-               p("You are currently on the introduction tab, which provides an overview of how to use this application."),
-               br(),
-               h4("Gaussian Noise Levels Tab: "),
-               p("On this tab, you'll see how the model's performance is affected by the introduction of Gaussian noise."),
-               br(),
-               h4("Image Resolution Tab: "),
-               p("This tab helps you understand how image resolution affects the model's performance. It provides a similar layout as the Gaussian Noise Levels Tab, but the focus here is on the image resolution."),
-               br(),
-               h4("Image Rotation Tab: "),
-               p("This tab like the Image Resolution Tab helps you understand how image rotation affects the model’s performance. It shows an original image along with two versions of the image at 90 degrees and 180 degrees rotation. The validation losses for the different rotations are compared and visualised through interactive histograms."),
-               br(),
-               h4("Visualisation Tab: "),
-               p("This tab allows you to be able to compare the validation loss learning curve of the different models, with or without augmentation. "),
-               br(),
-               h4("Demonstration Tab:"),
-               p("Upload a cell image and see how different augmentation changes your results!"),
-               br(),
-               
-               p("Remember, the goal of this application is to show how different factors can impact a CNN model's performance. While exploring, please consider how these factors might influence the design and implementation of your own models."),
-               p("Enjoy exploring!")
-             )
+             fluidRow(align = "center",
+                      htmlOutput(style = "margin: auto; font-size: 15px; max-width:1200px", 
+                                 outputId = "introduction"),
+                      htmlOutput(style = "margin: auto; font-size: 15px; max-width:1000px",
+                                 outputId = "nav_guide"),
+                      htmlOutput(style = "margin: auto; font-size: 15px; max-width:1100px",
+                                 outputId = "reminder"))
+             
     ),
     
     
@@ -182,7 +159,7 @@ ui <- fluidPage(
              titlePanel("Interactive Learning Curve Visualisation "),
              
              fluidRow(
-               column(3, style = "border: 4px groove #922C40;padding:25px; background-color: #ECD5BB;",
+               column(3, style = "border: 4px groove #922C40; padding:25px; background-color: #ECD5BB;",
                       selectizeInput("model_choice", "Model",
                                      choices = list(`Binary` = "binary",
                                                     `Binary w/class weights` = "binary_cweights",
@@ -232,7 +209,7 @@ ui <- fluidPage(
              titlePanel("Demo"),
              
              fluidRow(
-               column(3, style = "border: 4px groove #922C40;padding:25px; background-color: #ECD5BB;",
+               column(3, style = "border: 4px groove #922C40; padding:25px; background-color: #ECD5BB;",
                       fileInput("file", h3("File input")),
                       sliderInput("gnoise", label = "Gaussian Noise",
                                   min = 0, max = 1, value = 0.2),
@@ -258,11 +235,33 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   
+  output$introduction <- renderText({
+    HTML("<h2>Welcome to the Cell Classification Robustness (CCR) Shiny Application</h2>. <br>
+         This interactive tool is designed to help you understand how different factors, 
+         such as Gaussian noise and image resolution, can impact the performance of a CNN model.<br><br>")
+  })
+  
+  output$nav_guide <- renderText({
+    HTML("<h3>Navigation Guide</h3><br>
+         <p style = 'text-align:left'><b>Introduction Tab</b>: You are currently on it, which provides an overview of how to use this application.<br><br>
+         <b>Gaussian Noise Levels Tab</b>: On this tab, you'll see how the model's performance is affected by the introduction of Gaussian noise.<br><br>
+         <b>Image Resolution Tab</b>: This tab helps you understand how image resolution affects the model's performance. It provides a similar layout as the Gaussian Noise Levels Tab, but the focus here is on the image resolution.<br><br>
+         <b>Image Rotation Tab</b>: This tab like the Image Resolution Tab helps you understand how 
+         image rotation affects the model’s performance.<br><br>
+         <b>Visualisation Tab</b>: This tab allows you to be able to compare the validation loss learning curve of the different models, with or without augmentation.<br><br>
+         <b>Demonstration Tab</b>: Upload a cell image and see how different augmentation changes your results!<br><br></p>")
+  })
+  
+  output$reminder <- renderText({
+    HTML("<h3>REMEMBER!</h3>
+         <p style = 'text-align:left'> The goal of this application is to show how different factors can impact a CNN model's performance. 
+         While exploring, please consider how these factors might influence the design and implementation of your own models.</p>")
+  })
+  
   cell_image <- reactive({
     req(input$file)
     EBImage::readImage(input$file$datapath)
   })
-  
   
   output$original1 <- renderUI({
     
