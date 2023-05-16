@@ -1064,6 +1064,7 @@ server <- function(input, output, session) {
     updateCheckboxGroupInput(session,"resolution_choice", choices = list(`16x16` = "res16",
                                                                          `32x32` = "res32",
                                                                          `Random` = "res_rand"))
+    updateCheckboxGroupInput(session,"combine_model", choices = list(`Combined` = "comb"))
     
   })
   
