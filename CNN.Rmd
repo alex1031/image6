@@ -196,6 +196,7 @@ model_function_rmsprop <- function(learning_rate = lr) {
 }
 ```
 
+
 ```{r training_data}
 times = c()
 
@@ -285,6 +286,8 @@ tempdf <- data.frame(hist$metrics)
 
 #save_model_tf(model_catent, "cnn_catent")
 #save_model_tf(model_catent, "cnn_catent_cweights")
+
+#save_model_weights_tf(model_catent, "Image_App/models/cnn_catent_cweights_weights/")
 ```
 
 ```{r default_binary}
@@ -1348,12 +1351,14 @@ hist <- model_catent %>% fit(
 
 plot(hist)
 
-tempdf <- data.frame(hist$metrics)
+#tempdf <- data.frame(hist$metrics)
 #write.csv(tempdf, "Image_App/models/cnn_catent_comb/training.csv")
 #write.csv(tempdf, "Image_App/models/cnn_catent_cweights_comb/training.csv")
 
 #save_model_tf(model_catent, "models/cnn_catent_comb")
 #save_model_tf(model_catent, "models/cnn_catent_cweights_comb")
+
+#save_model_weights_tf(model_catent, "Image_App/models/cnn_catent_cweights_comb_weights")
 ```
 
 ```{r comb_binary}
@@ -1404,17 +1409,7 @@ tempdf <- data.frame(hist$metrics)
 #save_model_tf(model_rmsprop, "models/cnn_rmsprop_cweights_comb")
 #save_model_tf(model_rmsprop, "models/cnn_rmsprop_comb")
 
-save_model_weights_tf(model_rmsprop, "Image_App/models/cnn_rmsprop_cweights_comb/weights")
+#save_model_weights_tf(model_rmsprop, "Image_App/models/cnn_rmsprop_cweights_comb/weights")
 ```
-
-```{r}
-library(tensorflow)
-temp <- model_function_rmsprop()
-
-load_model_weights_tf(temp, "Image_App/models/cnn_rmsprop_cweights_comb/weights")
-
-attributes(temp)
-```
-
 
 

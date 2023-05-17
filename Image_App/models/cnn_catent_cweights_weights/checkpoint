@@ -1,0 +1,2 @@
+model_checkpoint_path: "cnn_catent_cweights_weights"
+all_model_checkpoint_paths: "cnn_catent_cweights_weights"

@@ -6,6 +6,33 @@ library(ggimage)
 library(keras)
 input_shape = c(64, 64, 1)
 lr = 0.001
+model_function <- function(learning_rate = lr) {
+  
+  k_clear_session()
+  
+  model <- keras_model_sequential() %>%
+    layer_conv_2d(filters = 32, kernel_size = c(3,3), activation = 'relu', input_shape = input_shape) %>% 
+    layer_max_pooling_2d(pool_size = c(2, 2)) %>% 
+    layer_conv_2d(filters = 64, kernel_size = c(3,3), activation = 'relu') %>% 
+    layer_max_pooling_2d(pool_size = c(2, 2)) %>% 
+    layer_dropout(rate = 0.25) %>% 
+    layer_flatten() %>% 
+    layer_dense(units = 128, activation = 'relu') %>% 
+    layer_dropout(rate = 0.5) %>% 
+    layer_dense(units = 64) %>% 
+    layer_dropout(rate = 0.5) %>% 
+    layer_dense(units = 28, activation = 'softmax')
+  
+  model %>% compile(
+    loss = "categorical_crossentropy",
+    optimizer = optimizer_adam(learning_rate = learning_rate),
+    metrics = "accuracy"
+  )
+  
+  return(model)
+  
+}
+
 model_function_rmsprop <- function(learning_rate = lr) {
   
   k_clear_session()
@@ -33,8 +60,15 @@ model_function_rmsprop <- function(learning_rate = lr) {
   
 }
 
-model <- model_function_rmsprop()
-load_model_weights_tf(model, "Image_App/models/cnn_rmsprop_cweights_comb/weights")
+model_original <- model_function()
+model_rmsprop_original <- model_function_rmsprop()
+model <- model_function()
+model_rmsprop <- model_function_rmsprop()
+
+load_model_weights_tf(model, "Image_App/models/cnn_catent_cweights_comb_weights/cnn_catent_cweights_comb_weights")
+load_model_weights_tf(model_original, "Image_App/models/cnn_catent_cweights_weights/cnn_catent_cweights_weights")
+load_model_weights_tf(model_rmsprop, "Image_App/models/cnn_rmsprop_cweights_comb/weights")
+load_model_weights_tf(model_rmsprop_original, "Image_App/models/cnn_rmsprop_cweights_weights/cnn_rmsprop_cweights_weights")
 
 labels = list.files("../bio_data/Biotechnology/data_processed/cell_images/")
 cell_boundaries_raw = read.csv("../bio_data/Biotechnology/data_processed/cell_boundaries.csv.gz")
@@ -144,6 +178,12 @@ shuf_yy_test <- yy[-shuf_ind, ]
 pred <- model |> predict(shuf_x_test)
 pred_class <- apply(pred, 1, which.max)
 
+original_pred <- model_original |> predict(shuf_x_test)
+original_pred_class <- apply(original_pred, 1, which.max)
+
+rms_pred <- model_rmsprop |> predict(shuf_x_test)
+rms_pred_class <- apply(rms_pred, 1, which.max)
+
 # library(mrtree)
 plotContTable <- function(est_label, true_label, true_label_order = NULL, est_label_order = NULL,
                           short.names = NULL, xlab = "True Labels", ylab = "Predicted Labels") {
@@ -159,12 +199,7 @@ plotContTable <- function(est_label, true_label, true_label_order = NULL, est_la
   }
   if (is.null(short.names)) {
     short.names = levels(factor(true_label))
-    short.names = levels(factor(true_label, c("cluster_1", "cluster_2", "cluster_3", "cluster_4", "cluster_5",
-                                  "cluster_6", "cluster_7", "cluster_8", "cluster_9", "cluster_10",
-                                  "cluster_11", "cluster_12", "cluster_13", "cluster_14", "cluster_15",
-                                  "cluster_16", "cluster_17", "cluster_18", "cluster_19", "cluster_20",
-                                  "cluster_21", "cluster_22", "cluster_23", "cluster_24", "cluster_25",
-                                  "cluster_26", "cluster_27", "cluster_28")))
+    
   }
   cont.table <- table(true_label, est_label)
   if (!is.null(true_label_order)) {
@@ -191,5 +226,17 @@ plotContTable <- function(est_label, true_label, true_label_order = NULL, est_la
   return(g)
 }
 
+order = c("cluster_1", "cluster_10", "cluster_11", "cluster_12", "cluster_13",
+          "cluster_14", "cluster_15", "cluster_16", "cluster_17", "cluster_18",
+          "cluster_19", "cluster_2", "cluster_20", "cluster_21", "cluster_22",
+          "cluster_23", "cluster_24", "cluster_25", "cluster_26", "cluster_27",
+          "cluster_28", "cluster_3", "cluster_4", "cluster_5", "cluster_6",
+          "cluster_7", "cluster_8", "cluster_9")
+
 plotContTable(pred_class, y[-shuf_ind])
+plotContTable(original_pred_class, y[-shuf_ind])
+plotContTable(rms_pred_class, y[-shuf_ind])
+
+1-(sum(diag(table(original_pred_class, y[-shuf_ind])))/length(y[-shuf_ind]))
+
 
