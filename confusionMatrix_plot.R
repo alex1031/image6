@@ -175,16 +175,85 @@ shuf_x_test <- array(shuf_x_test, dim = c(dim(shuf_x_test)[1], dim(shuf_x_test)[
 shuf_yy_train <- yy[shuf_ind, ]
 shuf_yy_test <- yy[-shuf_ind, ]
 
+replace_label <- function(labels) {
+  for (i in (1:length(labels))) {
+    if (labels[i] == "1") {
+      labels[i] = "cluster_1"
+    } else if (labels[i] == "2") {
+      labels[i] = "cluster_10"
+    } else if (labels[i] == "3") {
+      labels[i] = "cluster_11"
+    } else if (labels[i] == "4") {
+      labels[i] = "cluster_12"
+    } else if (labels[i] == "5") {
+      labels[i] = "cluster_13"
+    } else if (labels[i] == "6") {
+      labels[i] = "cluster_14"
+    } else if (labels[i] == "7") {
+      labels[i] = "cluster_15"
+    } else if (labels[i] == "8") {
+      labels[i] = "cluster_16"
+    } else if (labels[i] == "9") {
+      labels[i] = "cluster_17"
+    } else if (labels[i] == "10") {
+      labels[i] = "cluster_18"
+    } else if (labels[i] == "11") {
+      labels[i] = "cluster_19"
+    } else if (labels[i] == "12") {
+      labels[i] = "cluster_2"
+    } else if (labels[i] == "13") {
+      labels[i] = "cluster_20"
+    } else if (labels[i] == "14") {
+      labels[i] = "cluster_21"
+    } else if (labels[i] == "15") {
+      labels[i] = "cluster_22"
+    } else if (labels[i] == "16") {
+      labels[i] = "cluster_23"
+    } else if (labels[i] == "17") {
+      labels[i] = "cluster_24"
+    } else if (labels[i] == "18") {
+      labels[i] = "cluster_25"
+    } else if (labels[i] == "19") {
+      labels[i] = "cluster_26"
+    } else if (labels[i] == "20") {
+      labels[i] = "cluster_27"
+    } else if (labels[i] == "21") {
+      labels[i] = "cluster_28"
+    } else if (labels[i] == "22") {
+      labels[i] = "cluster_3"
+    } else if (labels[i] == "23") {
+      labels[i] = "cluster_4"
+    } else if (labels[i] == "24") {
+      labels[i] = "cluster_5"
+    } else if (labels[i] == "25") {
+      labels[i] = "cluster_6"
+    } else if (labels[i] == "26") {
+      labels[i] = "cluster_7"
+    } else if (labels[i] == "27") {
+      labels[i] = "cluster_8"
+    } else if (labels[i] == "28") {
+      labels[i] = "cluster_9"
+    }
+  }
+  return(labels)
+}
+
 pred <- model |> predict(shuf_x_test)
 pred_class <- apply(pred, 1, which.max)
+pred_class <- replace_label(pred_class)
 
 original_pred <- model_original |> predict(shuf_x_test)
 original_pred_class <- apply(original_pred, 1, which.max)
-
-rms_pred <- model_rmsprop |> predict(shuf_x_test)
-rms_pred_class <- apply(rms_pred, 1, which.max)
+original_pred_class <- replace_label(original_pred_class)
 
 # library(mrtree)
+order = c("cluster 1", "cluster 10", "cluster 11", "cluster 12", "cluster 13",
+          "cluster 14", "cluster 15", "cluster 16", "cluster 17", "cluster 18",
+          "cluster 19", "cluster 2", "cluster 20", "cluster 21", "cluster 22",
+          "cluster 23", "cluster 24", "cluster 25", "cluster 26", "cluster 27",
+          "cluster 28", "cluster 3", "cluster 4", "cluster 5", "cluster 6",
+          "cluster 7", "cluster 8", "cluster 9")
+
 plotContTable <- function(est_label, true_label, true_label_order = NULL, est_label_order = NULL,
                           short.names = NULL, xlab = "True Labels", ylab = "Predicted Labels") {
   
@@ -209,7 +278,7 @@ plotContTable <- function(est_label, true_label, true_label_order = NULL, est_la
     cont.table = cont.table[, est_label_order]
   }
   K <- ncol(cont.table)
-  sub.clusters <- paste0("cluster ", colnames(cont.table))
+  sub.clusters <- colnames(cont.table)
   cont.table <- apply(as.matrix(cont.table), 2, as.integer)
   cont.table <- data.frame(cont.table)
   cont.table$Reference = factor(short.names, levels = short.names)
@@ -226,16 +295,15 @@ plotContTable <- function(est_label, true_label, true_label_order = NULL, est_la
   return(g)
 }
 
-order = c("cluster_1", "cluster_10", "cluster_11", "cluster_12", "cluster_13",
-          "cluster_14", "cluster_15", "cluster_16", "cluster_17", "cluster_18",
-          "cluster_19", "cluster_2", "cluster_20", "cluster_21", "cluster_22",
-          "cluster_23", "cluster_24", "cluster_25", "cluster_26", "cluster_27",
-          "cluster_28", "cluster_3", "cluster_4", "cluster_5", "cluster_6",
-          "cluster_7", "cluster_8", "cluster_9")
+order = c("cluster 1", "cluster 10", "cluster 11", "cluster 12", "cluster 13",
+          "cluster 14", "cluster 15", "cluster 16", "cluster 17", "cluster 18",
+          "cluster 19", "cluster 2", "cluster 20", "cluster 21", "cluster 22",
+          "cluster 23", "cluster 24", "cluster 25", "cluster 26", "cluster 27",
+          "cluster 28", "cluster 3", "cluster 4", "cluster 5", "cluster 6",
+          "cluster 7", "cluster 8", "cluster 9")
 
-plotContTable(pred_class, y[-shuf_ind])
-plotContTable(original_pred_class, y[-shuf_ind])
-plotContTable(rms_pred_class, y[-shuf_ind])
+plotContTable(pred_class, y[-shuf_ind]) + ggtitle("Confusion Matrix of Combined Category Model")
+plotContTable(original_pred_class, y[-shuf_ind]) + ggtitle("Confusion Matrix of Original Category Model")
 
 1-(sum(diag(table(original_pred_class, y[-shuf_ind])))/length(y[-shuf_ind]))
 
