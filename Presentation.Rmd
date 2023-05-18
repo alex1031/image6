@@ -76,6 +76,40 @@ knitr::include_graphics("images/Workflow.png")
 
 ```
 
+---
+
+```{r echo=FALSE, fig.align='center'}
+knitr::include_graphics("images/Workflow_2.png")
+
+```
+
+---
+
+
+
+```{r echo=FALSE, fig.align='center'}
+knitr::include_graphics("images/Workflow_3.png")
+
+```
+
+---
+
+
+```{r echo=FALSE, fig.align='center'}
+knitr::include_graphics("images/Workflow_4.png")
+
+```
+
+---
+
+
+```{r echo=FALSE, fig.align='center'}
+knitr::include_graphics("images/Workflow_5.png")
+
+```
+
+
+
 
 
 ---
@@ -187,7 +221,29 @@ class: segue-red
 
 ---
 
-Screen-recording of 'visualizations'
+<video autosize: true controls>
+  <source src="Video_2.mp4" type="video/mp4">
+</video>
+
+
+---
+Matrix 1: No Noise
+
+```{r echo=FALSE,out.width="550px", out.height="550px", fig.align='center'}
+knitr::include_graphics("images/Matrix_1.png")
+
+```
+
+
+
+---
+Matrix 2: Combined 
+
+
+```{r echo=FALSE,out.width="550px", out.height="550px", fig.align='center'}
+knitr::include_graphics("images/Matrix_2.png")
+
+```
 
 
 
@@ -248,6 +304,8 @@ Bishop, C. M. (1995). Training with Noise is Equivalent to Tikhonov Regularizati
 Drenkow, N., Sani, N., Shpitser, I., & Unberath, M. (n.d.). A Systematic Review of Robustness in Deep Learning for Computer Vision: Mind the gap? Retrieved May 1, 2023, from https://arxiv.org/pdf/2112.00639.pdf
 
 Flowchart Maker & Online Diagram Software. (n.d.). App.diagrams.net. Retrieved May 13, 2023, from https://app.diagrams.net/#G1sC_YYsPtNceeaTTMVIXFAJuDiMoDg81P
+
+How to embed local Video in R Markdown? (n.d.). Stack Overflow. Retrieved May 17, 2023, from https://stackoverflow.com/questions/43840742/how-to-embed-local-video-in-r-markdown
 
 Image Recognition with Deep Neural Networks and its Use Cases. (n.d.). AltexSoft. Retrieved April 14, 2023, from https://www.altexsoft.com/blog/image-recognition-neural-networks-use-cases/#:~:text=The%20leading%20architecture%20used%20for
 
