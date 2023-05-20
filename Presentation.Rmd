@@ -131,7 +131,7 @@ class: segue-red
 Figure 2: CNN Model 
 
 
-```{r echo=FALSE, class = "middle"}
+```{r echo=FALSE, class = "centre"}
 knitr::include_graphics("images/CNN_diagram.png")
 
 ```
@@ -227,24 +227,10 @@ class: segue-red
 
 
 ---
-Matrix 1: No Noise
 
-```{r echo=FALSE,out.width="550px", out.height="550px", fig.align='center'}
-knitr::include_graphics("images/Matrix_1.png")
-
+```{r echo=FALSE,out.width="500px", out.height="500px"}
+knitr::include_graphics(c("images/Matrix_1.png", "images/Matrix_2.png"))
 ```
-
-
-
----
-Matrix 2: Combined 
-
-
-```{r echo=FALSE,out.width="550px", out.height="550px", fig.align='center'}
-knitr::include_graphics("images/Matrix_2.png")
-
-```
-
 
 
 ---
@@ -283,9 +269,12 @@ class: segue-red
 
 ## FUTURE STUDY 
 
-- **Improving Model:** Run the model multiple times to get the average validation accuracy 
+- **Improving Model:** Run the model multiple times to get the average validation accuracy. Validation accuracy can be used once a better CNN model is identified, as it provides another metric to measure robustness.
 
-- **Medial Analysis:** skin melanomas diagnosis, histopathological images, & breast magnetic resonance imaging (MRI) scans analysis, utilising the image classification in order to produce a diagnose (Mikołajczyk & Grochowski, 2018). 
+- **Medial Analysis:** Validated our model on different medial case studies: skin melanomas diagnosis, histopathological images, & breast magnetic resonance imaging (MRI) scans analysis, utilising the image classification in order to produce a diagnose (Mikołajczyk & Grochowski, 2018). 
+
+- **Gather more images:** for clusters with lower class count
+
 
 
 
