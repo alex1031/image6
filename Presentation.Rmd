@@ -78,7 +78,7 @@ knitr::include_graphics("images/Workflow.png")
 
 ---
 
-```{r echo=FALSE, fig.align='center'}
+```{r echo=FALSE, out.width="1200px", out.height="550px", fig.align='center'}
 knitr::include_graphics("images/Workflow_2.png")
 
 ```
@@ -87,7 +87,7 @@ knitr::include_graphics("images/Workflow_2.png")
 
 
 
-```{r echo=FALSE, fig.align='center'}
+```{r echo=FALSE,  out.width="560px", out.height="550px", fig.align='center'}
 knitr::include_graphics("images/Workflow_3.png")
 
 ```
@@ -95,7 +95,7 @@ knitr::include_graphics("images/Workflow_3.png")
 ---
 
 
-```{r echo=FALSE, fig.align='center'}
+```{r echo=FALSE, out.width="600px", out.height="600px", fig.align='center'}
 knitr::include_graphics("images/Workflow_4.png")
 
 ```
@@ -131,7 +131,7 @@ class: segue-red
 Figure 2: CNN Model 
 
 
-```{r echo=FALSE, class = "centre"}
+```{r echo=FALSE, out.width="1000px", out.height="400px", fig.align='center'}
 knitr::include_graphics("images/CNN_diagram.png")
 
 ```
