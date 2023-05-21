@@ -228,7 +228,7 @@ class: segue-red
 
 ---
 
-```{r echo=FALSE,out.width="500px", out.height="500px"}
+```{r echo=FALSE,out.width="550px", out.height="550px"}
 knitr::include_graphics(c("images/Matrix_1.png", "images/Matrix_2.png"))
 ```
 
