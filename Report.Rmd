@@ -1,0 +1,81 @@
+---
+title: "Final Report - Image 6"
+author: "names"
+output:
+  pdf_document:
+    df_print: paged
+    pandoc_args: []
+geometry: margin=2cm
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+
+# Aim and Background
+
+
+
+
+# Method - Data Collection & Developed Models
+
+
+## Baseline Model
+
+
+
+## Data Augmentation Models
+
+
+
+
+# Method - Evaluation Strategies 
+
+
+
+
+
+# Results - Combined Model
+
+
+
+
+
+
+# Results - Deployment 
+
+
+
+
+
+
+# Discussion & Conclusion
+
+
+
+
+
+
+
+\newpage
+
+\footnotesize
+
+
+# Student Contributions 
+
+
+
+
+# References
+
+
+
+
+
+\newpage
+
+# Appendix 
+
