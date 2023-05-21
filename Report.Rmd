@@ -13,22 +13,39 @@ knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(eval = FALSE)
 ```
 
+# Executive Summary
+
+Short description of the problem.
+The main findings.
+Key figure if appropriate.
+The practical relevance of the analysis.
+
+
 
 # Aim and Background
 
+A clear description of the problem, articulating the aim of this project.
+Provides appropriate multidisciplinary context and motivational background explained well in an appropriate language. 
+Including background of the data
 
 
 
 # Method - Data Collection & Developed Models
 
 
+Clear description of the approach in data collection, developed model, the evaluation strategies from a data-science perspective. Here we refer to all types of evaluation metrics including graphical, qualitative and quantitative metric.
+
+A clear description of your innovation and approach to the scientific problem.
+
+What is your approach and which tools are used and why? 
+
+
+
+
 ## Baseline Model
 
 
-
 ## Data Augmentation Models
-
-
 
 
 # Method - Evaluation Strategies 
@@ -40,21 +57,37 @@ knitr::opts_chunk$set(eval = FALSE)
 # Results - Combined Model
 
 
-
+A clear justification of the final approach based on the proposed evaluation strategies. Ensuring multiple evaluation strategies are used.
 
 
 
 # Results - Deployment 
 
 
+A clear description of the deployment process. An engaging and clear illustration of the product (games, shiny app, learning device etc) with a discussion of concepts from multiple disciplines.
+
+
+General results notes: 
+Communicate the results to a general scientist, note this is different to the target audience of your product. 
+What are the key findings? and use figures to illustrate the results.
 
 
 
 
-# Discussion & Conclusion
+# Discussion
+
+How robust and generalizable is your finding or your product?
+
+Discussion of potential shortcomings or issues associated with the development process or the product with reference to both disciplines. 
+
+Identification of future work or improvement in both disciplines.
 
 
 
+# Conclusion
+
+
+Conclusion adequately summarises the project and identification of future work.
 
 
 
@@ -78,4 +111,6 @@ knitr::opts_chunk$set(eval = FALSE)
 \newpage
 
 # Appendix 
+
+Main code & technical details of your approach
 
