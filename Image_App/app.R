@@ -13,6 +13,8 @@ library(tidyverse)
 library(keras)
 library(EBImage)
 library(plotly)
+#library(BiocManager)
+#options(repos = BiocManager::repositories())
 
 # Load the model and data
 #use_condaenv("r-reticulate")
