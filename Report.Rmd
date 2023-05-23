@@ -10,7 +10,10 @@ geometry: margin=2cm
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_chunk$set(eval = FALSE)
+knitr::opts_chunk$set(fig.pos = 'H')
+library(tidyverse)
+library(ggpubr)
+val_loss <- read.csv("Image_App/val_loss.csv")
 ```
 
 # Executive Summary
@@ -54,12 +57,82 @@ What is your approach and which tools are used and why?
 
 
 
-# Results - Combined Model
+# Results - Effect of Data Augmentation
 
 
 A clear justification of the final approach based on the proposed evaluation strategies. Ensuring multiple evaluation strategies are used.
 
+## Gaussian Noise
 
+```{r gausshist, eval=T, include=T, echo=F, fig.width = 15, fig.height = 5, align="center", fig.cap="Validation Loss for Different Gaussian Noise Levels on CNN Models."}
+level_order <- c("none", "low", "high", "random")
+
+gaussian <- val_loss |> filter((noise_type == "gaussian" | noise_type == "none") & !grepl("Category", model))
+gaussian_catent <- val_loss |> filter((noise_type == "gaussian" | noise_type == "none") & grepl("Category", model))
+
+p1 <- ggplot(data = gaussian, aes(x = factor(noise_level, level = level_order), y = val_loss, fill = model)) +
+       geom_bar(stat = "identity", position="dodge") +
+       xlab("Gaussian Noise Level") + ylab("Validation Loss") +
+       ggtitle("Comparison of Validation Loss on Binary and RMSprop Model")
+p2 <- ggplot(data = gaussian_catent, aes(x = factor(noise_level, level = level_order), y = val_loss, fill = model)) + 
+         geom_bar(stat = "identity", position="dodge") +
+         xlab("Gaussian Noise Level") + ylab("Validation Loss") +
+         ggtitle("Comparison of Validation Loss on Categorical Model")
+
+plot(ggarrange(p1, p2,
+          ncol = 2))
+```
+
+Observing Figure 1, the introduction of Gaussian noise in the implementation resulted in an increase in validation loss across all models, as compared to the original model. Notably, the application of random mean Gaussian noise yielded the largest validation loss for both the binary and categorical models. Moreover, a high mean Gaussian noise of 0.8 was applied led to the highest validation loss for both the binary and categorical models with class weights. Finally, the inclusion of low mean Gaussian noise demonstrated the highest validation loss for the RMSprop models, both with and without class weights.
+
+## Resolution
+
+```{r reshist, eval=T, include=T, echo=F, fig.width = 15, fig.height=5, align="center", fig.cap="Validation Loss for Different Resolution on CNN Models."}
+level_order <- c("none", "low", "medium", "random")
+    
+resolution <- val_loss |> filter((noise_type == "resolution" | noise_type == "none") & !grepl("Category", model))
+resolution_catent <- val_loss |> filter((noise_type == "resolution" | noise_type == "none") & grepl("Category", model))
+    
+p1 <- ggplot(data = resolution, aes(x = factor(noise_level, level = level_order), y = val_loss, fill = model)) +
+       geom_bar(stat = "identity", position="dodge") +
+       xlab("Resolution") + ylab("Validation Loss") +
+       ggtitle("Comparison of Validation Loss on Binary and RMSprop Model")
+
+p2 <- ggplot(data = resolution_catent, aes(x = factor(noise_level, level = level_order), y = val_loss, fill = model)) + 
+               geom_bar(stat = "identity", position="dodge") +
+               xlab("Resolution") + ylab("Validation Loss") +
+               ggtitle("Comparison of Validation Loss on Categorical Model")
+
+plot(ggarrange(p1, p2,
+          ncol = 2))
+```
+
+The incorporation of low (16x16) and medium (32x32) resolutions in the implementation resulted in a reduction of validation loss across all models, as illustrated in Figure 2. Notably, the categorical models with class weights experienced the most substantial benefits from this augmentation, with a decrease of 0.7503 when low resolution was added and a decrease of 1.0054 when medium resolution was utilized. Conversely, the introduction of random resolution into the training set led to an increase in validation loss, particularly noticeable in the binary model, with an increase of 0.0309.
+
+## Rotation
+
+```{r rotatehist, eval=T, include=T, echo=F, fig.width = 15, fig.height=5, align="center", fig.cap="Validation Loss for Different Rotation on CNN Models."}
+level_order <- c("none", "low", "high", "random")
+    
+resolution <- val_loss |> filter((noise_type == "rotation" | noise_type == "none") & !grepl("Category", model))
+
+p1 <- ggplot(data = resolution, aes(x = factor(noise_level, level = level_order), y = val_loss, fill = model)) +
+       geom_bar(stat = "identity", position="dodge") +
+       xlab("Rotation") + ylab("Validation Loss") +
+       ggtitle("Comparison of Validation Loss on Binary and RMSprop Model")
+
+resolution_catent <- val_loss |> filter((noise_type == "rotation" | noise_type == "none") & grepl("Category", model))
+    
+p2 <- ggplot(data = resolution_catent, aes(x = factor(noise_level, level = level_order), y = val_loss, fill = model)) + 
+       geom_bar(stat = "identity", position="dodge") +
+       xlab("Rotation") + ylab("Validation Loss") +
+       ggtitle("Comparison of Validation Loss on Categorical Model")
+
+plot(ggarrange(p1, p2,
+          ncol = 2))
+```
+
+From Figure x, it can be seen that...
 
 # Results - Deployment 
 
