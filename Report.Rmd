@@ -10,9 +10,11 @@ geometry: margin=2cm
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_chunk$set(fig.pos = 'H')
+#knitr::opts_chunk$set(fig.pos = '!ht')
 library(tidyverse)
 library(ggpubr)
+library(png)
+library(EBImage)
 val_loss <- read.csv("Image_App/val_loss.csv")
 ```
 
@@ -64,7 +66,7 @@ A clear justification of the final approach based on the proposed evaluation str
 
 ## Gaussian Noise
 
-```{r gausshist, eval=T, include=T, echo=F, fig.width = 15, fig.height = 5, align="center", fig.cap="Validation Loss for Different Gaussian Noise Levels on CNN Models."}
+```{r gausshist, eval=T, include=T, echo=F, fig.width = 15, fig.height = 5, align="center", fig.cap="Validation Loss for Different Gaussian Noise Levels on CNN Models.", fig.pos="H"}
 level_order <- c("none", "low", "high", "random")
 
 gaussian <- val_loss |> filter((noise_type == "gaussian" | noise_type == "none") & !grepl("Category", model))
@@ -87,7 +89,7 @@ Observing Figure 1, the introduction of Gaussian noise in the implementation res
 
 ## Resolution
 
-```{r reshist, eval=T, include=T, echo=F, fig.width = 15, fig.height=5, align="center", fig.cap="Validation Loss for Different Resolution on CNN Models."}
+```{r reshist, eval=T, include=T, echo=F, fig.width = 15, fig.height=5, align="center", fig.cap="Validation Loss for Different Resolution on CNN Models.", fig.pos="H"}
 level_order <- c("none", "low", "medium", "random")
     
 resolution <- val_loss |> filter((noise_type == "resolution" | noise_type == "none") & !grepl("Category", model))
@@ -107,11 +109,11 @@ plot(ggarrange(p1, p2,
           ncol = 2))
 ```
 
-The incorporation of low (16x16) and medium (32x32) resolutions in the implementation resulted in a reduction of validation loss across all models, as illustrated in Figure 2. Notably, the categorical models with class weights experienced the most substantial benefits from this augmentation, with a decrease of 0.7503 when low resolution was added and a decrease of 1.0054 when medium resolution was utilized. Conversely, the introduction of random resolution into the training set led to an increase in validation loss, particularly noticeable in the binary model, with an increase of 0.0309.
+The incorporation of low (16x16) and medium (32x32) resolutions in the training set resulted in a reduction of validation loss across all models, as illustrated in Figure 2. Notably, the categorical models with class weights experienced the most substantial benefits from this augmentation, with a decrease of 0.7503 when low resolution was added and a decrease of 1.0054 when medium resolution was utilized. Conversely, the introduction of random resolution into the training set led to an increase in validation loss, particularly noticeable in the binary model, with an increase of 0.0309.
 
 ## Rotation
 
-```{r rotatehist, eval=T, include=T, echo=F, fig.width = 15, fig.height=5, align="center", fig.cap="Validation Loss for Different Rotation on CNN Models."}
+```{r rotatehist, eval=T, include=T, echo=F, fig.width = 15, fig.height=5, align="center", fig.cap="Validation Loss for Different Rotation on CNN Models.", fig.pos="H"}
 level_order <- c("none", "low", "high", "random")
     
 resolution <- val_loss |> filter((noise_type == "rotation" | noise_type == "none") & !grepl("Category", model))
@@ -132,10 +134,25 @@ plot(ggarrange(p1, p2,
           ncol = 2))
 ```
 
-From Figure x, it can be seen that...
+While the binary and RMSprop models showed an increase in validation loss with rotation, the categorical models, both with and without class weights, demonstrated a decrease in validation loss when low (90 degrees) and high (180 degrees) rotations were applied, as shown in Figure 3. Models with random image rotation experienced the highest validation loss across all models.
+
+```{r sumtable, eval=T, include=T, echo=F, align="center", fig.cap="Summary Table of Validation Loss for All CNN Models.", fig.pos="H"}
+sumtable <- readImage("images/table_summary.png")
+display(sumtable, method="raster")
+```
+
+## Combining Data Augmentations
+
+```{r learningcurve, eval=T, include=T, echo=F, align="center", fig.cap="Learning Curves of Models with Combined Data Augmentation Compared to Models with No Noise", fig.pos="H"}
+lcurve <- readImage("images/combined_learning_curve.png")
+display(lcurve, method = "raster")
+```
+
+The combination of all data augmentations resulted in a reduction of validation loss across all models, except for the RMSprop model without class weights, as indicated in the summary table presented in Figure 4. Additionally, Figure 5 highlights that the combined models achieved a flatter learning curve, indicating an improvement in mitigating overfitting of the dataset. Notably, the most significant improvement was observed in the models utilising categorical cross-entropy, both with and without class weights, with a respective decrease of 1.3457 (21.87%) and 0.8985 (16.29%) in validation loss.
+
+As summarised in Figure 4, all models with class weights experiences a significant decrease in validation loss. This trend is particularly pronounced in the binary models, which experienced an average decrease of 0.05887 (23.10%) in validation loss. Similarly, models utilising the RMSprop optimizer without class weights display an average decrease of 0.05842 (23.04%) in validation loss. Moreover, models employing the RMSprop optimizer in conjunction with class weights demonstrate an average decrease of 0.0239 (12.45%) in validation loss.
 
 # Results - Deployment 
-
 
 A clear description of the deployment process. An engaging and clear illustration of the product (games, shiny app, learning device etc) with a discussion of concepts from multiple disciplines.
 
@@ -144,7 +161,7 @@ General results notes:
 Communicate the results to a general scientist, note this is different to the target audience of your product. 
 What are the key findings? and use figures to illustrate the results.
 
-
+All the plots above can be access through the [**CCR Shiny App**](https://usyd510436290.shinyapps.io/Image_App/).
 
 
 # Discussion
