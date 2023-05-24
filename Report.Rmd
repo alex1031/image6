@@ -61,9 +61,6 @@ What is your approach and which tools are used and why?
 
 # Results - Effect of Data Augmentation
 
-
-A clear justification of the final approach based on the proposed evaluation strategies. Ensuring multiple evaluation strategies are used.
-
 ## Gaussian Noise
 
 ```{r gausshist, eval=T, include=T, echo=F, fig.width = 15, fig.height = 5, align="center", fig.cap="Validation Loss for Different Gaussian Noise Levels on CNN Models.", fig.pos="H"}
@@ -150,19 +147,47 @@ display(lcurve, method = "raster")
 
 The combination of all data augmentations resulted in a reduction of validation loss across all models, except for the RMSprop model without class weights, as indicated in the summary table presented in Figure 4. Additionally, Figure 5 highlights that the combined models achieved a flatter learning curve, indicating an improvement in mitigating overfitting of the dataset. Notably, the most significant improvement was observed in the models utilising categorical cross-entropy, both with and without class weights, with a respective decrease of 1.3457 (21.87%) and 0.8985 (16.29%) in validation loss.
 
+
+
 As summarised in Figure 4, all models with class weights experiences a significant decrease in validation loss. This trend is particularly pronounced in the binary models, which experienced an average decrease of 0.05887 (23.10%) in validation loss. Similarly, models utilising the RMSprop optimizer without class weights display an average decrease of 0.05842 (23.04%) in validation loss. Moreover, models employing the RMSprop optimizer in conjunction with class weights demonstrate an average decrease of 0.0239 (12.45%) in validation loss.
+
+
 
 # Results - Deployment 
 
-A clear description of the deployment process. An engaging and clear illustration of the product (games, shiny app, learning device etc) with a discussion of concepts from multiple disciplines.
+All the plots above can be accessed through the [**CCR Shiny App**](https://usyd510436290.shinyapps.io/Image_App/).It consists of six tabs, the introduction tab, three separate tabs for a brief description of each noise and interactive bar chart results, one tab for the interactive visualisation of learning curves for every model used for this project, and one tab for to demonstrate an application of such tool. All interactive visualisation tools were created using plotly package in R (reference to plotly).
 
+## Introduction
 
-General results notes: 
-Communicate the results to a general scientist, note this is different to the target audience of your product. 
-What are the key findings? and use figures to illustrate the results.
+```{r intro_scrnshot, echo=F, out.width="70%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center', fig.cap="Screenshotof the Introduction tab in the CCR Shiny App"}
+knitr::include_graphics("images/intro.png")
+```
 
-All the plots above can be access through the [**CCR Shiny App**](https://usyd510436290.shinyapps.io/Image_App/).
+The introduction tab provides an overview of on the usage of the application, designed as a navigation guide for first time users. This is illustrated in Figure (ref).
 
+## Choise of Noise
+
+```{r noise_scrnshot, echo=F, out.width="49%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center', fig.cap="Screenshots of the Gaussian Noise level, Resolution and Rotation tab in the CCR Shiny App"}
+knitr::include_graphics(c("images/Noise_Results.jpg","images/Resolution_Results.jpg", "images/Rotation_Results.jpg"))
+```
+
+Within the noise description and results tabs, each augmentation was accompanied by examples showcasing its effect on a cell image, allowing users to compare it with the original image. This visual representation served to illustrate the impact of the augmentation for users who may be unfamiliar with the technique. Subsequently, a justification for the selection of each augmentation was provided, explaining the reasoning behind its inclusion. Additionally, an interactive bar chart wass utilized to compare the validation loss of the models with the implemented augmentation. By hovering over each bar in the interactive plot, users can access the specific validation loss value. These features are presented in Figure (ref).
+
+## Interactive Learning Curve Visualisation
+
+This particular tab offers an interactive visualization of the learning curves for all the models employed in this project. By default, the plot displays the validation loss over 100 epochs for models trained without any noise augmentation. However, users have the freedom to select and compare different models of their choice. This interactive feature enables users to gain insights into the impact of various augmentations, model optimisers, and loss functions on the learning process of CNN models. Figure (ref) provides concrete examples of these features in action.
+
+```{r intvis_scrnshot, echo=F, out.width="49%", out.height="30%",fig.cap="caption",fig.show='hold',fig.align='center', fig.cap="Screenshots of the Interactive Learning Curve Visualisation in the CCR Shiny App. Default (Top Left), Comparison between Low Gaussian Noise and Random Rotation (Top Right), and Comparison between Original Models and Combined Models (Bottom)."}
+knitr::include_graphics(c("images/intvis_default.png","images/invis_gau_res.png", "images/intvis_comb.png"))
+```
+
+## Demonstration
+
+```{r demo_scrnshot, echo=F, out.width="49%", out.height="30%",fig.cap="caption",fig.show='hold',fig.align='center', fig.cap="Screenshots of the Demonstration Tab in the CCR Shiny App. Default (Top Left), Image with 0.2 mean Gaussian Noise (Top Right), and Combination of Different Augmentations (Bottom)."}
+knitr::include_graphics(c("images/demo_default.png","images/demo_ex1.png", "images/demo_ex2.png"))
+```
+
+The demonstration tab provides users with the opportunity to upload a cell image and experiment with various data augmentations, such as different levels of Gaussian noise, rotation, and resolution changes. By applying these augmentations simultaneously, users can observe the resulting predicted cluster in the output tab. This interactive feature enables users to gain a better understanding of how different data augmentations affect the model's predictions, showcasing one of the many practical applications of this tool. All predictions are generated using the Combined CNN model, utilizing categorical cross-entropy as the loss function. Figure (ref) contains illustrative examples of the tool's application.
 
 # Discussion
 
@@ -171,6 +196,12 @@ How robust and generalizable is your finding or your product?
 Discussion of potential shortcomings or issues associated with the development process or the product with reference to both disciplines. 
 
 Identification of future work or improvement in both disciplines.
+
+Furthermore, as can been seen in the confusion matricies in Figure (ref) ... (Talk about Combined model not overfitting)
+
+```{r conf_matrix, echo=F, out.width="65%", out.height="30%",fig.cap="caption",fig.show='hold',fig.align='center', fig.cap="Confusion Matrix on Validation Set for Original CNN model (Left) and Combined CNN model (Right). Both models used Categorical Cross-Entropy as the loss function."}
+knitr::include_graphics(c("images/Matrix_1.png","images/Matrix_2.png"))
+```
 
 
 
