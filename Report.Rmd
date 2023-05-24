@@ -78,7 +78,38 @@ p2 <- ggplot(data = gaussian_catent, aes(x = factor(noise_level, level = level_o
          xlab("Gaussian Noise Level") + ylab("Validation Loss") +
          ggtitle("Comparison of Validation Loss on Categorical Model")
 
-plot(ggarrange(p1, p2,
+level_order <- c("none", "low", "medium", "random")
+    
+resolution <- val_loss |> filter((noise_type == "resolution" | noise_type == "none") & !grepl("Category", model))
+resolution_catent <- val_loss |> filter((noise_type == "resolution" | noise_type == "none") & grepl("Category", model))
+    
+p3 <- ggplot(data = resolution, aes(x = factor(noise_level, level = level_order), y = val_loss, fill = model)) +
+       geom_bar(stat = "identity", position="dodge") +
+       xlab("Resolution") + ylab("Validation Loss") +
+       ggtitle("Comparison of Validation Loss on Binary and RMSprop Model")
+
+p4 <- ggplot(data = resolution_catent, aes(x = factor(noise_level, level = level_order), y = val_loss, fill = model)) + 
+               geom_bar(stat = "identity", position="dodge") +
+               xlab("Resolution") + ylab("Validation Loss") +
+               ggtitle("Comparison of Validation Loss on Categorical Model")
+
+level_order <- c("none", "low", "high", "random")
+    
+resolution <- val_loss |> filter((noise_type == "rotation" | noise_type == "none") & !grepl("Category", model))
+
+p5 <- ggplot(data = resolution, aes(x = factor(noise_level, level = level_order), y = val_loss, fill = model)) +
+       geom_bar(stat = "identity", position="dodge") +
+       xlab("Rotation") + ylab("Validation Loss") +
+       ggtitle("Comparison of Validation Loss on Binary and RMSprop Model")
+
+resolution_catent <- val_loss |> filter((noise_type == "rotation" | noise_type == "none") & grepl("Category", model))
+    
+p6 <- ggplot(data = resolution_catent, aes(x = factor(noise_level, level = level_order), y = val_loss, fill = model)) + 
+       geom_bar(stat = "identity", position="dodge") +
+       xlab("Rotation") + ylab("Validation Loss") +
+       ggtitle("Comparison of Validation Loss on Categorical Model")
+
+plot(ggarrange(p1, p2, p3, p4, p5, p6,
           ncol = 2))
 ```
 
@@ -86,50 +117,9 @@ Observing Figure 1, the introduction of Gaussian noise in the implementation res
 
 ## Resolution
 
-```{r reshist, eval=T, include=T, echo=F, fig.width = 15, fig.height=5, align="center", fig.cap="Validation Loss for Different Resolution on CNN Models.", fig.pos="H"}
-level_order <- c("none", "low", "medium", "random")
-    
-resolution <- val_loss |> filter((noise_type == "resolution" | noise_type == "none") & !grepl("Category", model))
-resolution_catent <- val_loss |> filter((noise_type == "resolution" | noise_type == "none") & grepl("Category", model))
-    
-p1 <- ggplot(data = resolution, aes(x = factor(noise_level, level = level_order), y = val_loss, fill = model)) +
-       geom_bar(stat = "identity", position="dodge") +
-       xlab("Resolution") + ylab("Validation Loss") +
-       ggtitle("Comparison of Validation Loss on Binary and RMSprop Model")
-
-p2 <- ggplot(data = resolution_catent, aes(x = factor(noise_level, level = level_order), y = val_loss, fill = model)) + 
-               geom_bar(stat = "identity", position="dodge") +
-               xlab("Resolution") + ylab("Validation Loss") +
-               ggtitle("Comparison of Validation Loss on Categorical Model")
-
-plot(ggarrange(p1, p2,
-          ncol = 2))
-```
-
 The incorporation of low (16x16) and medium (32x32) resolutions in the training set resulted in a reduction of validation loss across all models, as illustrated in Figure 2. Notably, the categorical models with class weights experienced the most substantial benefits from this augmentation, with a decrease of 0.7503 when low resolution was added and a decrease of 1.0054 when medium resolution was utilized. Conversely, the introduction of random resolution into the training set led to an increase in validation loss, particularly noticeable in the binary model, with an increase of 0.0309.
 
 ## Rotation
-
-```{r rotatehist, eval=T, include=T, echo=F, fig.width = 15, fig.height=5, align="center", fig.cap="Validation Loss for Different Rotation on CNN Models.", fig.pos="H"}
-level_order <- c("none", "low", "high", "random")
-    
-resolution <- val_loss |> filter((noise_type == "rotation" | noise_type == "none") & !grepl("Category", model))
-
-p1 <- ggplot(data = resolution, aes(x = factor(noise_level, level = level_order), y = val_loss, fill = model)) +
-       geom_bar(stat = "identity", position="dodge") +
-       xlab("Rotation") + ylab("Validation Loss") +
-       ggtitle("Comparison of Validation Loss on Binary and RMSprop Model")
-
-resolution_catent <- val_loss |> filter((noise_type == "rotation" | noise_type == "none") & grepl("Category", model))
-    
-p2 <- ggplot(data = resolution_catent, aes(x = factor(noise_level, level = level_order), y = val_loss, fill = model)) + 
-       geom_bar(stat = "identity", position="dodge") +
-       xlab("Rotation") + ylab("Validation Loss") +
-       ggtitle("Comparison of Validation Loss on Categorical Model")
-
-plot(ggarrange(p1, p2,
-          ncol = 2))
-```
 
 While the binary and RMSprop models showed an increase in validation loss with rotation, the categorical models, both with and without class weights, demonstrated a decrease in validation loss when low (90 degrees) and high (180 degrees) rotations were applied, as shown in Figure 3. Models with random image rotation experienced the highest validation loss across all models.
 
@@ -140,7 +130,7 @@ display(sumtable, method="raster")
 
 ## Combining Data Augmentations
 
-```{r learningcurve, eval=T, include=T, echo=F, align="center", fig.cap="Learning Curves of Models with Combined Data Augmentation Compared to Models with No Noise", fig.pos="H"}
+```{r learningcurve, eval=F, include=T, echo=F, align="center", fig.cap="Learning Curves of Models with Combined Data Augmentation Compared to Models with No Noise", fig.pos="H"}
 lcurve <- readImage("images/combined_learning_curve.png")
 display(lcurve, method = "raster")
 ```
@@ -159,35 +149,35 @@ All the plots above can be accessed through the [**CCR Shiny App**](https://usyd
 
 ## Introduction
 
-```{r intro_scrnshot, echo=F, out.width="70%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center', fig.cap="Screenshotof the Introduction tab in the CCR Shiny App"}
+```{r eval=F, intro_scrnshot, echo=F, out.width="70%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center', fig.cap="Screenshotof the Introduction tab in the CCR Shiny App"}
 knitr::include_graphics("images/intro.png")
 ```
 
-The introduction tab provides an overview of on the usage of the application, designed as a navigation guide for first time users. This is illustrated in Figure (ref).
+The introduction tab provides an overview of on the usage of the application, designed as a navigation guide for first time users.
 
 ## Choise of Noise
 
-```{r noise_scrnshot, echo=F, out.width="49%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center', fig.cap="Screenshots of the Gaussian Noise level, Resolution and Rotation tab in the CCR Shiny App"}
+```{r eval=F, noise_scrnshot, echo=F, out.width="49%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center', fig.cap="Screenshots of the Gaussian Noise level, Resolution and Rotation tab in the CCR Shiny App"}
 knitr::include_graphics(c("images/Noise_Results.jpg","images/Resolution_Results.jpg", "images/Rotation_Results.jpg"))
 ```
 
-Within the noise description and results tabs, each augmentation was accompanied by examples showcasing its effect on a cell image, allowing users to compare it with the original image. This visual representation served to illustrate the impact of the augmentation for users who may be unfamiliar with the technique. Subsequently, a justification for the selection of each augmentation was provided, explaining the reasoning behind its inclusion. Additionally, an interactive bar chart wass utilized to compare the validation loss of the models with the implemented augmentation. By hovering over each bar in the interactive plot, users can access the specific validation loss value. These features are presented in Figure (ref).
+Within the noise description and results tabs, each augmentation was accompanied by examples showcasing its effect on a cell image, allowing users to compare it with the original image. This visual representation served to illustrate the impact of the augmentation for users who may be unfamiliar with the technique. Subsequently, a justification for the selection of each augmentation was provided, explaining the reasoning behind its inclusion. Additionally, an interactive bar chart wass utilized to compare the validation loss of the models with the implemented augmentation. By hovering over each bar in the interactive plot, users can access the specific validation loss value. 
 
 ## Interactive Learning Curve Visualisation
 
-This particular tab offers an interactive visualization of the learning curves for all the models employed in this project. By default, the plot displays the validation loss over 100 epochs for models trained without any noise augmentation. However, users have the freedom to select and compare different models of their choice. This interactive feature enables users to gain insights into the impact of various augmentations, model optimisers, and loss functions on the learning process of CNN models. Figure (ref) provides concrete examples of these features in action.
+This particular tab offers an interactive visualization of the learning curves for all the models employed in this project. By default, the plot displays the validation loss over 100 epochs for models trained without any noise augmentation. However, users have the freedom to select and compare different models of their choice. This interactive feature enables users to gain insights into the impact of various augmentations, model optimisers, and loss functions on the learning process of CNN models. 
 
-```{r intvis_scrnshot, echo=F, out.width="49%", out.height="30%",fig.cap="caption",fig.show='hold',fig.align='center', fig.cap="Screenshots of the Interactive Learning Curve Visualisation in the CCR Shiny App. Default (Top Left), Comparison between Low Gaussian Noise and Random Rotation (Top Right), and Comparison between Original Models and Combined Models (Bottom)."}
+```{r eval=F, intvis_scrnshot, echo=F, out.width="49%", out.height="30%",fig.cap="caption",fig.show='hold',fig.align='center', fig.cap="Screenshots of the Interactive Learning Curve Visualisation in the CCR Shiny App. Default (Top Left), Comparison between Low Gaussian Noise and Random Rotation (Top Right), and Comparison between Original Models and Combined Models (Bottom)."}
 knitr::include_graphics(c("images/intvis_default.png","images/invis_gau_res.png", "images/intvis_comb.png"))
 ```
 
 ## Demonstration
 
-```{r demo_scrnshot, echo=F, out.width="49%", out.height="30%",fig.cap="caption",fig.show='hold',fig.align='center', fig.cap="Screenshots of the Demonstration Tab in the CCR Shiny App. Default (Top Left), Image with 0.2 mean Gaussian Noise (Top Right), and Combination of Different Augmentations (Bottom)."}
+```{r eval=F, demo_scrnshot, echo=F, out.width="49%", out.height="30%",fig.cap="caption",fig.show='hold',fig.align='center', fig.cap="Screenshots of the Demonstration Tab in the CCR Shiny App. Default (Top Left), Image with 0.2 mean Gaussian Noise (Top Right), and Combination of Different Augmentations (Bottom)."}
 knitr::include_graphics(c("images/demo_default.png","images/demo_ex1.png", "images/demo_ex2.png"))
 ```
 
-The demonstration tab provides users with the opportunity to upload a cell image and experiment with various data augmentations, such as different levels of Gaussian noise, rotation, and resolution changes. By applying these augmentations simultaneously, users can observe the resulting predicted cluster in the output tab. This interactive feature enables users to gain a better understanding of how different data augmentations affect the model's predictions, showcasing one of the many practical applications of this tool. All predictions are generated using the Combined CNN model, utilizing categorical cross-entropy as the loss function. Figure (ref) contains illustrative examples of the tool's application.
+The demonstration tab provides users with the opportunity to upload a cell image and experiment with various data augmentations, such as different levels of Gaussian noise, rotation, and resolution changes. By applying these augmentations simultaneously, users can observe the resulting predicted cluster in the output tab. This interactive feature enables users to gain a better understanding of how different data augmentations affect the model's predictions, showcasing one of the many practical applications of this tool. All predictions are generated using the Combined CNN model, utilizing categorical cross-entropy as the loss function. 
 
 # Discussion
 
