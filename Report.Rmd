@@ -63,7 +63,7 @@ What is your approach and which tools are used and why?
 
 ## Gaussian Noise
 
-```{r gausshist, eval=T, include=T, echo=F, fig.width = 15, fig.height = 5, align="center", fig.cap="Validation Loss for Different Gaussian Noise Levels on CNN Models.", fig.pos="H"}
+```{r gausshist, eval=T, include=T, echo=F, fig.width = 15, fig.height = 15, align="center", fig.cap="Validation Loss for Different Gaussian Noise Levels on CNN Models.", fig.pos="H"}
 level_order <- c("none", "low", "high", "random")
 
 gaussian <- val_loss |> filter((noise_type == "gaussian" | noise_type == "none") & !grepl("Category", model))
@@ -110,7 +110,7 @@ p6 <- ggplot(data = resolution_catent, aes(x = factor(noise_level, level = level
        ggtitle("Comparison of Validation Loss on Categorical Model")
 
 plot(ggarrange(p1, p2, p3, p4, p5, p6,
-          ncol = 2))
+          ncol = 2, nrow=3))
 ```
 
 Observing Figure 1, the introduction of Gaussian noise in the implementation resulted in an increase in validation loss across all models, as compared to the original model. Notably, the application of random mean Gaussian noise yielded the largest validation loss for both the binary and categorical models. Moreover, a high mean Gaussian noise of 0.8 was applied led to the highest validation loss for both the binary and categorical models with class weights. Finally, the inclusion of low mean Gaussian noise demonstrated the highest validation loss for the RMSprop models, both with and without class weights.
