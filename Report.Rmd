@@ -43,9 +43,9 @@ Prior to introsucing augmentation, several preprocessing steps were employed to 
 
 ## Baseline Model
 
-Initially, a Random Forest classifier was employed, utilising the pixel values of the provided images, to predict the corresponding cell clusters. However, the limited complexity of the model hindered its capability to capture the composite shapes of the cells, resulting in a error rate of 95%. Also, the high number of clusters within the dataset, totaling 28, further constrained its predictive performance. The reliance of handcrafted features or simple statistical measures from the Random Forest classifier was not effective in capturing the complex and abstract features present in images, leading to sub optimal performance in image classification tasks. This lead to the introduction of CNN.
+Initially, a Random Forest classifier was employed, utilising the pixel values of the provided images, to predict the corresponding cell clusters. However, the limited complexity of the model hindered its capability to capture the composite shapes of the cells, resulting in a error rate of 95%. Also, the high number of clusters within the dataset, totaling 28, further constrained its predictive performance. The reliance of handcrafted features or simple statistical measures from the Random Forest classifier was not effective in capturing the complex and abstract features present in images, leading to sub optimal performance in image classification tasks.
 
-(Talk about why CNN is optimal - using some literature review)
+In order to address these issues, convolutional neural networks were employed. These neural networks utilise parameterised, sparsely connected kernels which preserve the spatial characterics of images, which allowed complex features to be captured (Shorten & Khoshgoftaar, 2019). Furthermore, CNNs can be built on pre-existing networks, which can be retrained for new recognition tasks. These advantages open up new opportunities to use CNNs for real-world applications without increasing computational complexities or costs (CNN-Example - Databricks, 2023).
 
 The CNN model architecture implemented in this study comprised of two convolutional layers. The first convolutional layer consisted of 32 filters, followed by a pooling layer. Subsequently, the second convolutional layer was comprised of 64 filters, followed by another pooling layer. The output from the second convolutional layer was then flattened into a one-dimensional form, preparing it for the subsequent classification process. For classification, fully connected layers and dropout layers were employed to mitigate overfitting and enhance generalization capabilities. There were in total 1,632,962 trainable parameters available. A binary cross-entropy loss function was employed, along with the Adam optimiser. Prior to feeding the image into the CNN model, a transformation step is required to convert the images into a four-dimensional array. This array consists of two size 64 arrays, which correspond to the dimensions of the image. Typically, for RGB images, three size 64 arrays are utilized. However, for black and white images, two size 64 arrays are sufficient to represent the image data. (refer to literature). Given the constraints of limited computational resources, a shallow architecture was deliberately chosen for this study. This decision aimed to accommodate the resource limitations associated with deeper CNN networks and expedite the training process, ultimately achieving interpretable results within the given constraints.
 
@@ -68,13 +68,20 @@ Finally, this model variation utilises RMSprop optimiser instead of the Adam opt
 
 # Method - Evaluation Strategies 
 
+```{r eval=T, eval_Strat, echo=F, out.width="70%", out.height="20%",fig.show='hold',fig.align='center', fig.cap="Overview of Evaluation Strategy."}
+knitr::include_graphics("images/eval_strategy.png")
+```
+
+
 During the implementation process, the augmented training set was incorporated alongside the original training set. The rotating and resizing augmentations were performed using the EBImage package (reference to EBImage package). To introduce Gaussian noise, a randomly generated number from a normal distribution with a specified mean and a standard deviation of 0.2 was added to each image. The augmented training set was subsequently utilised in training each variation of the CNN model, with the validation loss recorded for each epoch and stored in a CSV file for further analysis and evaluation.
 
-To comprehensively assess the impact of each augmentation, different noise levels were carefully selected. For Gaussian noise, three distinct subcategories were incorporated: low (0.2 mean), high (0.8 mean), and random (0.2 to 1 mean). Similarly, the same approach was applied to rotation and resizing augmentations. Three subcategories were defined: low (90 degrees, 16x16), high/medium (180 degrees, 32x32), and random (1 to 359 degrees, low or medium resolution). Resizing were limited to below 64 due to the lack of improvement of quality past that. By adopting this strategy, a more insightful analysis of the effect of each augmentation on the model's performance and robustness was facilitated.
+To comprehensively assess the impact of each augmentation, different noise levels were carefully selected. For Gaussian noise, three distinct subcategories were incorporated: low (0.2 mean), high (0.8 mean), and random (0.2 to 1 mean). Similarly, the same approach was applied to rotation and resizing augmentations. Three subcategories were defined: low (90 degrees, 16x16), high/medium (180 degrees, 32x32), and random (1 to 359 degrees, low or medium resolution). Resizing were limited to below 64 due to the lack of improvement of quality past that. By adopting this strategy, a more insightful analysis of the effect of each augmentation on the model's performance and robustness was facilitated. All model were trained for 100 epochs in order to maintain consistency.
+
+Finally, the level that produced the lowest validation for each augmentation was combined to form one single training set, which was then fed into the 6 different CNN model variations. This allowed for the exploration on how data augmentation can used to improve the robustness of the model to variations in input image quality. The evaluation process was illustrated through Figure 1.
 
 # Results - Effect of Data Augmentation
 
-```{r gausshist, eval=T, include=T, echo=F, fig.width = 15, fig.height = 15, align="center", fig.cap="Validation Loss for Different Gaussian Noise Levels on CNN Models.", fig.pos="H"}
+```{r gausshist, eval=T, include=T, echo=F, fig.width = 15, fig.height = 15, align="center", fig.cap="Bar Charts of Validation Loss for Different Gaussian Noise Levels on CNN Models. Top row includes the charts for Gaussian noise, middle row include charts for Resolution, and bottom row includes charts for rotation.", fig.pos="H"}
 level_order <- c("none", "low", "high", "random")
 
 gaussian <- val_loss |> filter((noise_type == "gaussian" | noise_type == "none") & !grepl("Category", model))
@@ -89,17 +96,17 @@ p2 <- ggplot(data = gaussian_catent, aes(x = factor(noise_level, level = level_o
          xlab("Gaussian Noise Level") + ylab("Validation Loss") +
          ggtitle("Comparison of Validation Loss on Categorical Model")
 
-level_order <- c("none", "low", "medium", "random")
+level_order_res <- c("none", "low", "medium", "random")
     
 resolution <- val_loss |> filter((noise_type == "resolution" | noise_type == "none") & !grepl("Category", model))
 resolution_catent <- val_loss |> filter((noise_type == "resolution" | noise_type == "none") & grepl("Category", model))
     
-p3 <- ggplot(data = resolution, aes(x = factor(noise_level, level = level_order), y = val_loss, fill = model)) +
+p3 <- ggplot(data = resolution, aes(x = factor(noise_level, level = level_order_res), y = val_loss, fill = model)) +
        geom_bar(stat = "identity", position="dodge") +
        xlab("Resolution") + ylab("Validation Loss") +
        ggtitle("Comparison of Validation Loss on Binary and RMSprop Model")
 
-p4 <- ggplot(data = resolution_catent, aes(x = factor(noise_level, level = level_order), y = val_loss, fill = model)) + 
+p4 <- ggplot(data = resolution_catent, aes(x = factor(noise_level, level = level_order_res), y = val_loss, fill = model)) + 
                geom_bar(stat = "identity", position="dodge") +
                xlab("Resolution") + ylab("Validation Loss") +
                ggtitle("Comparison of Validation Loss on Categorical Model")
@@ -126,15 +133,15 @@ plot(ggarrange(p1, p2, p3, p4, p5, p6,
 
 ## Gaussian Noise
 
-Observing Figure 1, the introduction of Gaussian noise in the implementation resulted in an increase in validation loss across all models, as compared to the original model. Notably, the application of random mean Gaussian noise yielded the largest validation loss for both the binary and categorical models. Moreover, a high mean Gaussian noise of 0.8 was applied led to the highest validation loss for both the binary and categorical models with class weights. Finally, the inclusion of low mean Gaussian noise demonstrated the highest validation loss for the RMSprop models, both with and without class weights.
+Observing Figure 2 (Top Row), the introduction of Gaussian noise in the implementation resulted in an increase in validation loss across all models, as compared to the original model. Notably, the application of random mean Gaussian noise yielded the largest validation loss for both the binary and categorical models. Moreover, a high mean Gaussian noise of 0.8 was applied led to the highest validation loss for both the binary and categorical models with class weights. Finally, the inclusion of low mean Gaussian noise demonstrated the highest validation loss for the RMSprop models, both with and without class weights.
 
 ## Resolution
 
-The incorporation of low (16x16) and medium (32x32) resolutions in the training set resulted in a reduction of validation loss across all models, as illustrated in Figure 2. Notably, the categorical models with class weights experienced the most substantial benefits from this augmentation, with a decrease of 0.7503 when low resolution was added and a decrease of 1.0054 when medium resolution was utilized. Conversely, the introduction of random resolution into the training set led to an increase in validation loss, particularly noticeable in the binary model, with an increase of 0.0309.
+The incorporation of low (16x16) and medium (32x32) resolutions in the training set resulted in a reduction of validation loss across all models, as illustrated in Figure 2 (Middle Row). The categorical models with class weights experienced the most substantial benefits from this augmentation, with a decrease of 0.7503 when low resolution was added and a decrease of 1.0054 when medium resolution was utilized. Conversely, the introduction of random resolution into the training set led to an increase in validation loss, particularly noticeable in the binary model, with an increase of 0.0309.
 
 ## Rotation
 
-While the binary and RMSprop models showed an increase in validation loss with rotation, the categorical models, both with and without class weights, demonstrated a decrease in validation loss when low (90 degrees) and high (180 degrees) rotations were applied, as shown in Figure 3. Models with random image rotation experienced the highest validation loss across all models.
+While the binary and RMSprop models showed an increase in validation loss with rotation, the categorical models, both with and without class weights, demonstrated a decrease in validation loss when low (90 degrees) and high (180 degrees) rotations were applied, as shown in Figure 2 (Bottom Row). Models with random image rotation experienced the highest validation loss across all models.
 
 ```{r sumtable, eval=T, include=T, echo=F, align="center", fig.cap="Summary Table of Validation Loss for All CNN Models.", fig.pos="H"}
 sumtable <- readImage("images/table_summary.png")
@@ -148,12 +155,7 @@ lcurve <- readImage("images/combined_learning_curve.png")
 display(lcurve, method = "raster")
 ```
 
-The combination of all data augmentations resulted in a reduction of validation loss across all models, except for the RMSprop model without class weights, as indicated in the summary table presented in Figure 4. Additionally, Figure 5 highlights that the combined models achieved a flatter learning curve, indicating an improvement in mitigating overfitting of the dataset. Notably, the most significant improvement was observed in the models utilising categorical cross-entropy, both with and without class weights, with a respective decrease of 1.3457 (21.87%) and 0.8985 (16.29%) in validation loss.
-
-
-
-As summarised in Figure 4, all models with class weights experiences a significant decrease in validation loss. This trend is particularly pronounced in the binary models, which experienced an average decrease of 0.05887 (23.10%) in validation loss. Similarly, models utilising the RMSprop optimizer without class weights display an average decrease of 0.05842 (23.04%) in validation loss. Moreover, models employing the RMSprop optimizer in conjunction with class weights demonstrate an average decrease of 0.0239 (12.45%) in validation loss.
-
+The combination of all data augmentations resulted in a reduction of validation loss across all models, except for the RMSprop model without class weights, as indicated in the summary table presented in Figure 3. Notably, the most significant improvement was observed in the models utilising categorical cross-entropy, both with and without class weights, with a respective decrease of 1.3457 (21.87%) and 0.8985 (16.29%) in validation loss.
 
 
 # Results - Deployment 
@@ -162,17 +164,9 @@ All the plots above can be accessed through the [**CCR Shiny App**](https://usyd
 
 ## Introduction
 
-```{r eval=F, intro_scrnshot, echo=F, out.width="70%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center', fig.cap="Screenshotof the Introduction tab in the CCR Shiny App"}
-knitr::include_graphics("images/intro.png")
-```
-
 The introduction tab provides an overview of on the usage of the application, designed as a navigation guide for first time users.
 
 ## Choise of Noise
-
-```{r eval=F, noise_scrnshot, echo=F, out.width="49%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center', fig.cap="Screenshots of the Gaussian Noise level, Resolution and Rotation tab in the CCR Shiny App"}
-knitr::include_graphics(c("images/Noise_Results.jpg","images/Resolution_Results.jpg", "images/Rotation_Results.jpg"))
-```
 
 Within the noise description and results tabs, each augmentation was accompanied by examples showcasing its effect on a cell image, allowing users to compare it with the original image. This visual representation served to illustrate the impact of the augmentation for users who may be unfamiliar with the technique. Subsequently, a justification for the selection of each augmentation was provided, explaining the reasoning behind its inclusion. Additionally, an interactive bar chart was utilised to compare the validation loss of the models with the implemented augmentation. By hovering over each bar in the interactive plot, users can access the specific validation loss value. 
 
@@ -180,15 +174,7 @@ Within the noise description and results tabs, each augmentation was accompanied
 
 This particular tab offers an interactive visualisation of the learning curves for all the models employed in this project. By default, the plot displays the validation loss over 100 epochs for models trained without any noise augmentation. However, users have the freedom to select and compare different models of their choice. This interactive feature enables users to gain insights into the impact of various augmentations, model optimisers, and loss functions on the learning process of CNN models. 
 
-```{r eval=F, intvis_scrnshot, echo=F, out.width="49%", out.height="30%",fig.cap="caption",fig.show='hold',fig.align='center', fig.cap="Screenshots of the Interactive Learning Curve Visualisation in the CCR Shiny App. Default (Top Left), Comparison between Low Gaussian Noise and Random Rotation (Top Right), and Comparison between Original Models and Combined Models (Bottom)."}
-knitr::include_graphics(c("images/intvis_default.png","images/invis_gau_res.png", "images/intvis_comb.png"))
-```
-
 ## Demonstration
-
-```{r eval=T, demo_scrnshot, echo=F, out.width="49%", out.height="30%",fig.cap="caption",fig.show='hold',fig.align='center', fig.cap="Screenshots of the Demonstration Tab in the CCR Shiny App. Default (Top Left), Image with 0.2 mean Gaussian Noise (Top Right), and Combination of Different Augmentations (Bottom)."}
-knitr::include_graphics(c("images/demo_default.png","images/demo_ex1.png", "images/demo_ex2.png"))
-```
 
 The demonstration tab provides users with the opportunity to upload a cell image and experiment with various data augmentations, such as different levels of Gaussian noise, rotation, and resolution changes. By applying these augmentations simultaneously, users can observe the resulting predicted cluster in the output tab. This interactive feature enables users to gain a better understanding of how different data augmentations affect the model's predictions, showcasing one of the many practical applications of this tool. All predictions are generated using the Combined CNN model, utilising categorical cross-entropy as the loss function. 
 
@@ -200,6 +186,19 @@ Discussion of potential shortcomings or issues associated with the development p
 
 Identification of future work or improvement in both disciplines.
 
+An unexpected discovery arising from the results was that the inclusion of Gaussian noise resulted in an increase in validation loss across the models, suggesting overfitting tendencies. This finding contradicted previous research (reference to literature), which indicated that the implementation of Gaussian noise typically mitigates overfitting in CNN models. As depicted in Figure 4, one possible explanation for this outcome could be that the addition of Gaussian noise did not alter the predicted cluster of the cell image, unlike other augmentations that resulted in a discernible change in the predicted cluster. (Compare our implementation to other literatures, and conclude that future improvement can come from using the other implementation).
+
+```{r demo_noise, echo=F, out.width="65%", out.height="30%",fig.cap="caption",fig.show='hold',fig.align='center', fig.cap="Demonstration tab on the CCR Shiny App. Image with no noise (Top). Image with 0.2 mean Gaussian noise (Middle). Image with 0.8 Gaussian noise (Bottom). The predicted cluster output remained the same."}
+knitr::include_graphics(c("images/demo_nonoise.png","images/demo_02noise.png", "images/demo_08noise.png"))
+```
+
+
+A similar observation was made regarding the rotation augmentation, as it resulted in an increase in validation loss for the CNN models employing binary cross-entropy loss functions and RMSprop optimizers. This could be attributed to the enlarged size and increased variation of the training set, which slowed down the learning process for the models. Specifically, the models utilising binary cross-entropy loss functions may have been more susceptible to this effect, as this type of loss function does not penalise misclassifications as significantly as other loss functions (literature?). This issue was mitigated through employing a categorical cross-entropy loss function, which led to a decrease in validation loss was when this augmentation was applied, as can be seen in Figure 2 (Bottom row). The categorical cross-entropy loss function is better suited for multi-class classification problems and encourages the model to more accurately predict the correct cluster (literature).
+
+The incorporation of low and medium resolutions resulted in a decrease in validation loss for all models. This can be attributed to the reduction in resolution, which enables the model to capture a more generalized shape of the cells, thereby improving the overall prediction generalization. (Supported by literature). However, when a random choice between low and medium resolutions was implemented, an increase in validation loss was observed for the binary and RMSprop models.This could be attributed to similar challenges encountered during the implementation of rotation augmentation for the aforementioned models.
+
+As summarised in Figure 3, all models with class weights experiences a significant decrease in validation loss. This trend is particularly pronounced in the binary models, which experienced an average decrease of 0.05887 (23.10%) in validation loss. This finding demonstrated the effectiveness of class weights in addressing class imbalance within datasets, as it assigned higher weights to classes with lower counts. Furthermore, models utilising the RMSprop optimiser without class weights display an average decrease of 0.05842 (23.04%) in validation loss. Also, models employing the RMSprop optimizer in conjunction with class weights demonstrate an average decrease of 0.0239 (12.45%) in validation loss. (Literature on why RMSprop optimiser is better than Adam optimiser in this case).
+
 Furthermore, as can been seen in the confusion matricies in Figure (ref) ... (Talk about Combined model not overfitting)
 
 Why the use of this app can help our stakeholders
@@ -208,7 +207,7 @@ Why the use of this app can help our stakeholders
 knitr::include_graphics(c("images/Matrix_1.png","images/Matrix_2.png"))
 ```
 
-
+## Limitation
 
 # Conclusion
 
