@@ -77,7 +77,7 @@ During the implementation process, the augmented training set was incorporated a
 
 To comprehensively assess the impact of each augmentation, different noise levels were carefully selected. For Gaussian noise, three distinct subcategories were incorporated: low (0.2 mean), high (0.8 mean), and random (0.2 to 1 mean). Similarly, the same approach was applied to rotation and resizing augmentations. Three subcategories were defined: low (90 degrees, 16x16), high/medium (180 degrees, 32x32), and random (1 to 359 degrees, low or medium resolution). Resizing were limited to below 64 due to the lack of improvement of quality past that. By adopting this strategy, a more insightful analysis of the effect of each augmentation on the model's performance and robustness was facilitated. All model were trained for 100 epochs in order to maintain consistency.
 
-Finally, the level that produced the lowest validation for each augmentation was combined to form one single training set, which was then fed into the 6 different CNN model variations. This allowed for the exploration on how data augmentation can used to improve the robustness of the model to variations in input image quality. The evaluation process was illustrated through Figure 1.
+Finally, the level that produced the lowest validation for each augmentation was combined to form one single training set, adding up to 6000 samples, which was then fed into the 6 different CNN model variations. This allowed for the exploration on how data augmentation can used to improve the robustness of the model to variations in input image quality. The evaluation process was illustrated through Figure 1.
 
 # Results - Effect of Data Augmentation
 
@@ -155,7 +155,7 @@ lcurve <- readImage("images/combined_learning_curve.png")
 display(lcurve, method = "raster")
 ```
 
-The combination of all data augmentations resulted in a reduction of validation loss across all models, except for the RMSprop model without class weights, as indicated in the summary table presented in Figure 3. Notably, the most significant improvement was observed in the models utilising categorical cross-entropy, both with and without class weights, with a respective decrease of 1.3457 (21.87%) and 0.8985 (16.29%) in validation loss.
+The combination of all data augmentations resulted in a reduction of validation loss across all models, except for the RMSprop model without class weights, as indicated in the summary table presented in Figure 3. 
 
 
 # Results - Deployment 
@@ -180,12 +180,6 @@ The demonstration tab provides users with the opportunity to upload a cell image
 
 # Discussion
 
-How robust and generalizable is your finding or your product?
-
-Discussion of potential shortcomings or issues associated with the development process or the product with reference to both disciplines. 
-
-Identification of future work or improvement in both disciplines.
-
 An unexpected discovery arising from the results was that the inclusion of Gaussian noise resulted in an increase in validation loss across the models, suggesting overfitting tendencies. This finding contradicted previous research (reference to literature), which indicated that the implementation of Gaussian noise typically mitigates overfitting in CNN models. As depicted in Figure 4, one possible explanation for this outcome could be that the addition of Gaussian noise did not alter the predicted cluster of the cell image, unlike other augmentations that resulted in a discernible change in the predicted cluster. (Compare our implementation to other literatures, and conclude that future improvement can come from using the other implementation).
 
 ```{r demo_noise, echo=F, out.width="65%", out.height="30%",fig.cap="caption",fig.show='hold',fig.align='center', fig.cap="Demonstration tab on the CCR Shiny App. Image with no noise (Top). Image with 0.2 mean Gaussian noise (Middle). Image with 0.8 Gaussian noise (Bottom). The predicted cluster output remained the same."}
@@ -199,23 +193,35 @@ The incorporation of low and medium resolutions resulted in a decrease in valida
 
 As summarised in Figure 3, all models with class weights experiences a significant decrease in validation loss. This trend is particularly pronounced in the binary models, which experienced an average decrease of 0.05887 (23.10%) in validation loss. This finding demonstrated the effectiveness of class weights in addressing class imbalance within datasets, as it assigned higher weights to classes with lower counts. Furthermore, models utilising the RMSprop optimiser without class weights display an average decrease of 0.05842 (23.04%) in validation loss. Also, models employing the RMSprop optimizer in conjunction with class weights demonstrate an average decrease of 0.0239 (12.45%) in validation loss. (Literature on why RMSprop optimiser is better than Adam optimiser in this case).
 
-Furthermore, as can been seen in the confusion matricies in Figure (ref) ... (Talk about Combined model not overfitting)
-
-Why the use of this app can help our stakeholders
+By combining the optimal levels of each augmentation, substantial enhancements were achieved in the model's robustness. Specifically, the most significant improvements were observed in the models utilising categorical cross-entropy, with and without class weights, resulting in a decrease of 1.3457 (21.87%) and 0.8985 (16.29%) in validation loss, respectively, as depicted in Figure 3. This finding aligns with previous literature (reference to literature), which highlights that increasing the training size enhances data variability, providing the model with a wider range of examples to learn from. It also enabled the models to capture a more comprehensive representation of the underlying patterns (literature?). 
 
 ```{r conf_matrix, echo=F, out.width="65%", out.height="30%",fig.cap="caption",fig.show='hold',fig.align='center', fig.cap="Confusion Matrix on Validation Set for Original CNN model (Left) and Combined CNN model (Right). Both models used Categorical Cross-Entropy as the loss function."}
 knitr::include_graphics(c("images/Matrix_1.png","images/Matrix_2.png"))
 ```
 
+In addition, as observed in Figure 5, despite a higher error rate in the confusion matrix of the model incorporating combined augmentations and utilising the categorical cross-entropy loss function, it did not exhibit a bias towards clusters with a high class count. This is particularly evident in the model's predictions for cluster 1 and cluster 2, which had the highest class counts among all clusters. The model made more predictions, although inaccurate, for classes with lower class counts, demonstrating the effectiveness of implementing class weights. This finding indicates that the model learned to assign appropriate weights to different classes, thereby mitigating the impact of class imbalance and ensuring fair representation of all classes in the predictions. (This is supported by previous literature?). Employing a CNN model with a more complex architecture is likely to result in more accurate predictions for classes with lower counts.
+
+The deployment of the CCR Shiny App not only provides valuable insights to researchers in the field but also serves as a practical tool for healthcare practitioners. By showcasing the application of cell image classification, the demonstration tab offers healthcare practitioners a glimpse into the potential of such a tool in their own practice. The Shiny App ultimately provides access to the study's results, enabling stakeholders and anyone interested to explore and draw their own inferences from the findings. This promotes transparency, collaboration, and the dissemination of knowledge in the field, aiding researchers and practitioners in making informed decisions and advancing their own studies.
+
 ## Limitation
+
+Due to the simplicity of the CNN model used in this study and the high number of clusters in the dataset, the available metrics for effective interpretation were limited. Validation accuracy could not be relied upon since all models consistently showed low validation accuracy. The learning curves of the models also indicated overfitting tendencies, as evidenced by a continuous increase in validation loss over epochs. 
+
+The generalisability of the results obtained in this experiment is constrained by the fact that the data was sourced from a single mouse brain. This limitation introduces a potential bias and restricts the ability to make broader generalizations about cell image classification across different samples or species.
+
+The limited computational resources available for this study restricted the scope of augmentation testing and model experimentation. As a result, only a select set of augmentations and model variations could be explored within the given constraints.
 
 # Conclusion
 
+The inclusion of Gaussian noise typically resulted in an increase in validation loss, as did the introduction of rotation. However, the application of categorical cross-entropy loss function proved effective in mitigating these effects, leading to a reduction in validation loss. Similarly, the utilisation of lower and medium resolutions contributed to a decrease in validation loss across all models. Notably, the incorporation of class weights demonstrated its effectiveness in addressing class imbalance, resulting in decreased validation loss. The implementation of RMSprop optimiser also helped to minimize validation loss compared to the Adam optimiser.
 
-Conclusion adequately summarises the project and identification of future work.
+Through combining the best performing noise levels into one training set, an overall decrease in validation loss was observed, demonstrating its ability to improve the robustness of the model to variations in input image quality.
 
+## Future Work
 
+To overcome the limitations of this study, several areas can be further developed. Firstly, increasing computational resources would enable the investigation of additional augmentations, providing a more comprehensive understanding of their effects. Moreover, with enhanced resources, a wider range of model variations can be explored, facilitating more in-depth analyses. The utilisation of deeper CNN architectures would allow for the incorporation of additional evaluation metrics, leading to more comprehensive insights. To enhance the reliability of results, it is recommended to run the models multiple times and record the average outcomes, ensuring more consistent and robust findings.
 
+Expanding the dataset by gathering images from multiple mouse brains would significantly enhance the robustness of the results. This approach would not only help address the issue of class imbalance within the dataset but also provide a broader and more generalised interpretation of the findings. By incorporating data from diverse sources, potential biases specific to a single mouse brain can be mitigated, leading to more reliable and representative outcomes.
 
 \newpage
 
